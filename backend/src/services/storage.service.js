@@ -1,4 +1,6 @@
 const ImageKit = require("imagekit");
+const { v4: uuid } = require("uuid");
+
 
 const imagekit = new ImageKit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
@@ -6,13 +8,16 @@ const imagekit = new ImageKit({
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
 });
 
-async function uploadFile(file, fileName) {
-    const result = await imagekit.upload({
-        file: file, // required
-        fileName: fileName, // required
-    })
+async function uploadFile(file, originalName) {
 
-    return result; // Return the URL of the uploaded file
+    const extension = originalName.split('.').pop();  // gets mp4
+
+    const result = await imagekit.upload({
+        file: file,
+        fileName: uuid() + "." + extension,   // auto add extension
+    });
+
+    return result;
 }
 
 module.exports = {

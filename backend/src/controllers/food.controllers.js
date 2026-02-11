@@ -7,7 +7,10 @@ const { v4: uuid } = require("uuid")
 
 
 async function createFood(req, res) {
-    const fileUploadResult = await storageService.uploadFile(req.file.buffer, uuid())
+    const fileUploadResult = await storageService.uploadFile(
+        req.file.buffer,
+        req.file.originalname   // ✅ pass original file name
+    );
 
     const foodItem = await foodModel.create({
         name: req.body.name,
