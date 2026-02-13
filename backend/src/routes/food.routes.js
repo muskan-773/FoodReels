@@ -1,45 +1,54 @@
 const express = require('express');
 const foodController = require('../controllers/food.controllers');
-
-const authMiddleware = require("../middlewares/auth.middleware")
-const router = express.Router();
+const authMiddleware = require("../middlewares/auth.middleware");
 const multer = require('multer');
 
+const router = express.Router();
 
 const upload = multer({
     storage: multer.memoryStorage(),
-})
+});
+
+/* ============================= */
+/*          PUBLIC ROUTES        */
+/* ============================= */
+
+// GET /api/food  → Public (home page food list)
+router.get("/", foodController.getFoodItems);
 
 
-/* POST /api/food/ [protected]*/
-router.post('/',
+/* ============================= */
+/*      FOOD PARTNER ROUTES     */
+/* ============================= */
+
+// POST /api/food  → Only Food Partner can create food
+router.post("/",
     authMiddleware.authFoodPartnerMiddleware,
     upload.single("video"),
-    foodController.createFood)
+    foodController.createFood
+);
 
 
-/* GET /api/food/ [protected] */
-router.get("/",
+/* ============================= */
+/*         USER ROUTES           */
+/* ============================= */
+
+// Like food → Only logged in user
+router.post("/like",
     authMiddleware.authUserMiddleware,
-    foodController.getFoodItems)
+    foodController.likeFood
+);
 
-
-router.post('/like',
-    authMiddleware.authUserMiddleware,
-    foodController.likeFood)
-
-
-router.post('/save',
+// Save food → Only logged in user
+router.post("/save",
     authMiddleware.authUserMiddleware,
     foodController.saveFood
-)
+);
 
-
-router.get('/save',
+// Get saved foods → Only logged in user
+router.get("/save",
     authMiddleware.authUserMiddleware,
     foodController.getSaveFood
-)
+);
 
-
-
-module.exports = router
+module.exports = router;

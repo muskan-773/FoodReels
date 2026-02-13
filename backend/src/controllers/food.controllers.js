@@ -7,24 +7,39 @@ const { v4: uuid } = require("uuid")
 
 
 async function createFood(req, res) {
-    const fileUploadResult = await storageService.uploadFile(
-        req.file.buffer,
-        req.file.originalname   // ✅ pass original file name
-    );
+    try {
 
-    const foodItem = await foodModel.create({
-        name: req.body.name,
-        description: req.body.description,
-        video: fileUploadResult.url,
-        foodPartner: req.foodPartner._id
-    })
+        if (!req.foodPartner) {
+            return res.status(401).json({
+                message: "Food partner not authenticated"
+            });
+        }
 
-    res.status(201).json({
-        message: "food created successfully",
-        food: foodItem
-    })
+        const fileUploadResult = await storageService.uploadFile(
+            req.file.buffer,
+            req.file.originalname
+        );
 
+        const foodItem = await foodModel.create({
+            name: req.body.name,
+            description: req.body.description,
+            video: fileUploadResult.url,
+            foodPartner: req.foodPartner._id
+        });
+
+        res.status(201).json({
+            message: "food created successfully",
+            food: foodItem
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Server error"
+        });
+    }
 }
+
 
 async function getFoodItems(req, res) {
     const foodItems = await foodModel.find({})

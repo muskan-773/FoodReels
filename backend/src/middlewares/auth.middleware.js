@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 async function authFoodPartnerMiddleware(req, res, next) {
 
-    const token = req.cookies.token;
+    const token = req.cookies.foodPartnerToken;
 
     if (!token) {
         return res.status(401).json({
@@ -34,7 +34,7 @@ async function authFoodPartnerMiddleware(req, res, next) {
 
 async function authUserMiddleware(req, res, next) {
 
-    const token = req.cookies.token;
+    const token = req.cookies.userToken;
 
     if (!token) {
         return res.status(401).json({
