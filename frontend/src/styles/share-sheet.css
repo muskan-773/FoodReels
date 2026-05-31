@@ -1,0 +1,168 @@
+@import './theme.css';
+
+.share-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: backdrop-in 200ms ease;
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.share-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: sheet-up 280ms cubic-bezier(.32,1,.23,1);
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (min-width: 600px) {
+  .share-sheet {
+    border-radius: 20px;
+    margin-bottom: 40px;
+    max-width: 420px;
+  }
+}
+
+.share-sheet__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  align-self: center;
+  margin-bottom: 4px;
+}
+
+.share-sheet__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.share-sheet__food-name {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: .9rem;
+  margin: -8px 0 0;
+}
+
+/* App icons row */
+.share-apps {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.share-app-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: transform 120ms ease;
+}
+.share-app-btn:hover { transform: translateY(-2px); }
+
+.share-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  display: grid;
+  place-items: center;
+}
+
+.share-app-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Divider */
+.share-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-secondary);
+  font-size: .78rem;
+}
+.share-divider::before,
+.share-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Copy row */
+.share-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.share-copy-url {
+  flex: 1;
+  font-size: .8rem;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-copy-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease;
+  white-space: nowrap;
+}
+.share-copy-btn:hover { background: var(--color-accent-hover); }
+.share-copy-btn--copied { background: #16a34a; }
+
+/* Cancel */
+.share-close-btn {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.share-close-btn:hover { background: var(--color-border); }

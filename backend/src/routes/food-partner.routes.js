@@ -4,10 +4,13 @@ const authMiddleware = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
+// PUT /api/food-partner/profile  — edit own profile (must be BEFORE /:id)
+router.put("/profile",
+    authMiddleware.authFoodPartnerMiddleware,
+    foodPartnerController.updateFoodPartner
+);
 
-/* /api/food-partner/:id */
-router.get("/:id",
-    foodPartnerController.getFoodPartnerById)
-
+// GET /api/food-partner/:id  — public profile
+router.get("/:id", foodPartnerController.getFoodPartnerById);
 
 module.exports = router;

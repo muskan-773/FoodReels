@@ -1,176 +1,163 @@
 @import "./theme.css";
 
-/* Page container ensures full viewport and background */
+/* ═══════════════════════════════════════════════════════════
+   PAGE SHELL
+═══════════════════════════════════════════════════════════ */
 .reels-page {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
+  inset: 0;
   background: #000;
-  overflow: hidden; /* parent hides overscroll glow on iOS */
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Vertical feed with snap scrolling */
+/* ═══════════════════════════════════════════════════════════
+   SCROLLABLE FEED
+═══════════════════════════════════════════════════════════ */
 .reels-feed {
-  height: 100%;
   width: 100%;
+  height: 100%;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
+.reels-feed::-webkit-scrollbar { display: none; }
 
-/* Each reel takes full viewport */
+/* ═══════════════════════════════════════════════════════════
+   SINGLE REEL  —  mobile: full-width stack
+                   desktop: left-info | video | right-actions
+═══════════════════════════════════════════════════════════ */
 .reel {
   position: relative;
-  height: 100vh;
-  height: 100dvh;
   width: 100%;
+  height: 100dvh;
   scroll-snap-align: start;
-  background: #000; /* fallback while video loads */
+  background: #000;
+  overflow: hidden;
+
+  /* mobile: simple stack, video fills everything */
+  display: block;
 }
 
-.reel-video {
+/* ═══════════════════════════════════════════════════════════
+   VIDEO WRAPPER  (always fills the reel on mobile)
+═══════════════════════════════════════════════════════════ */
+.reel-video-wrap {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* cover entire screen */
-  object-position: center;
-  background: #000;
+  inset: 0;
   z-index: 0;
 }
 
-/* Overlay: content sits on top of video */
-.reel-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+.reel-video {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: flex-start; /* content near top */
-  pointer-events: none; /* allow click-through except controls */
+  object-fit: cover;
+  object-position: center;
+  background: #000;
+  display: block;
+  cursor: pointer;
 }
 
-/* Subtle top-to-bottom gradient so text is readable on any video */
+/* ═══════════════════════════════════════════════════════════
+   MOBILE OVERLAY  (gradient + bottom-left text + right btns)
+═══════════════════════════════════════════════════════════ */
+.reel-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .reel-overlay-gradient {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
+  inset: 0;
   background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.3) 30%,
-    rgba(0, 0, 0, 0.05) 60%,
-    rgba(0, 0, 0, 0) 100%
+    to top,
+    rgba(0,0,0,0.82) 0%,
+    rgba(0,0,0,0.38) 30%,
+    rgba(0,0,0,0.08) 55%,
+    transparent 100%
   );
 }
 
+/* bottom-left text on mobile */
 .reel-content {
-  position: relative;
-  width: 100%;
-  padding: var(--space-6);
-  padding-right: 4.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  pointer-events: auto; /* enable button click */
-  z-index: 3;
-}
-
-/* Truncated to two lines */
-.reel-description {
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  font-size: 1rem;
-  line-height: 1.3;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 90ch;
-}
-
-.reel-btn {
-  align-self: flex-start;
-  background: var(--color-accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-decoration: none;
-  box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base),
-    background var(--transition-base), box-shadow var(--transition-base);
-}
-
-.reel-btn:hover {
-  background: var(--color-accent-hover);
-}
-.reel-btn:active {
-  transform: translateY(1px);
-}
-.reel-btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-
-/* Desktop tweaks */
-@media (min-width: 768px) {
-  .reel-content {
-    padding: 36px;
-  }
-  .reel-description {
-    font-size: 1.05rem;
-    max-width: 70ch;
-  }
-}
-
-/* Right-side vertical actions (like, bookmark, comments) */
-.reel-actions {
   position: absolute;
-  right: 10px;
-  bottom: 50%;
-  transform: translateY(30%);
+  left: 0;
+  right: 64px;
+  bottom: 0;
+  padding: 20px 16px 76px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 5px;
   pointer-events: auto;
   z-index: 3;
 }
 
-.reel-action {
-  width: 48px;
-  height: 48px;
+.reel-username {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  margin: 0;
+}
+.reel-name {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  margin: 0;
+}
+.reel-description {
+  color: rgba(255,255,255,0.88);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+.reel-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
   border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, #000 35%, transparent);
-  backdrop-filter: blur(2px);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: var(--shadow-md);
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 120ms ease;
 }
+.reel-btn:hover  { background: rgba(255,255,255,0.28); color: #fff; }
+.reel-btn:active { transform: translateY(1px); }
 
-.reel-action:active {
-  transform: translateY(1px);
-}
-
-.reel-action__count {
-  color: #fff;
-  text-align: center;
-  font-size: 12px;
+/* ═══════════════════════════════════════════════════════════
+   RIGHT-SIDE ACTION BUTTONS  (mobile: absolute over video)
+═══════════════════════════════════════════════════════════ */
+.reel-actions {
+  position: absolute;
+  right: 10px;
+  bottom: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  z-index: 4;
+  pointer-events: auto;
 }
 
 .reel-action-group {
@@ -178,13 +165,248 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  color: #fff;
 }
 
-.empty-state {
+.reel-action {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 120ms ease;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.7));
+}
+.reel-action:active { transform: scale(0.88); }
+.reel-action:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.7);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.reel-action__count {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+/* avatar on right side (mobile) */
+.reel-avatar-link { display: block; text-decoration: none; }
+.reel-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+  border: 2px solid #fff;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP LEFT INFO PANEL  — hidden on mobile
+═══════════════════════════════════════════════════════════ */
+.reel-side-info { display: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   PAUSE / HEART ANIMATIONS
+═══════════════════════════════════════════════════════════ */
+.reel-pause-icon {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  color: #fff;
+  z-index: 5;
+  pointer-events: none;
+  animation: fade-out 600ms ease forwards;
+}
+@keyframes fade-out {
+  0%,60% { opacity: 1; }
+  100%    { opacity: 0; }
+}
+
+.reel-heart-burst {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 6;
+  pointer-events: none;
+  animation: heart-pop 900ms ease forwards;
+}
+@keyframes heart-pop {
+  0%   { opacity: 0; transform: scale(0.4); }
+  30%  { opacity: 1; transform: scale(1.2); }
+  60%  { opacity: 1; transform: scale(1.0); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════════════════ */
+.empty-state {
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 1rem;
+  text-align: center;
+  padding: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP LAYOUT  ≥ 900px
+   ┌──────────────┬──────────────┬──────────┐
+   │  left info   │    video     │  actions │
+   └──────────────┴──────────────┴──────────┘
+═══════════════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+
+  /* feed is now a narrow centered column that holds the 3-col reels */
+  .reels-feed {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  /* each reel becomes a flex row */
+  .reel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 24px;
+    overflow: visible;
+    background: transparent;
+  }
+
+  /* video wrapper: fixed 9:16 column, centered */
+  .reel-video-wrap {
+    position: relative;        /* no longer absolute */
+    flex: 0 0 auto;
+    width: 340px;
+    height: calc(100dvh - 40px);
+    max-height: 680px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1),
+                0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  .reel-video {
+    border-radius: 16px;
+  }
+
+  /* hide mobile overlay text on desktop */
+  .reel-overlay { display: none; }
+
+  /* ── Left info panel ── */
+  .reel-side-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 240px;
+    flex-shrink: 0;
+    align-items: flex-start;
+  }
+
+  .reel-side-avatar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #fff;
+    transition: opacity 120ms ease;
+  }
+  .reel-side-avatar-link:hover { opacity: 0.85; }
+
+  .reel-side-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+    border: 2px solid rgba(255,255,255,0.8);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  .reel-side-avatar-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .reel-side-restaurant {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .reel-side-follow {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.78rem;
+  }
+
+  .reel-side-name {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .reel-side-desc {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .reel-side-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 999px;
+    padding: 9px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 120ms ease;
+    margin-top: 4px;
+  }
+  .reel-side-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+  /* ── Right actions: move out of absolute, become flex column ── */
+  .reel-actions {
+    position: relative;        /* no longer absolute */
+    right: auto;
+    bottom: auto;
+    flex-shrink: 0;
+    width: 60px;
+    justify-content: center;
+  }
+
+  /* avatar on right side hidden on desktop (shown in left panel instead) */
+  .reel-avatar-link { display: none; }
 }

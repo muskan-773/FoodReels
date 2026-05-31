@@ -2,29 +2,30 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import '../../styles/create-food.css';
 import { useNavigate } from 'react-router-dom';
+import Toast from '../../components/Toast';
 
 const CreateFood = () => {
-    const [ name, setName ] = useState('');
-    const [ description, setDescription ] = useState('');
-    const [ videoFile, setVideoFile ] = useState(null);
-    const [ videoURL, setVideoURL ] = useState('');
-    const [ fileError, setFileError ] = useState('');
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [videoFile, setVideoFile] = useState(null);
+    const [videoURL, setVideoURL] = useState('');
+    const [fileError, setFileError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [toast, setToast] = useState(null);
     const fileInputRef = useRef(null);
-
     const navigate = useNavigate();
 
+    const showToast = (message, type = 'info') => setToast({ message, type });
+
     useEffect(() => {
-        if (!videoFile) {
-            setVideoURL('');
-            return;
-        }
+        if (!videoFile) { setVideoURL(''); return; }
         const url = URL.createObjectURL(videoFile);
         setVideoURL(url);
         return () => URL.revokeObjectURL(url);
-    }, [ videoFile ]);
+    }, [videoFile]);
 
     const onFileChange = (e) => {
-        const file = e.target.files && e.target.files[ 0 ];
+        const file = e.target.files?.[0];
         if (!file) { setVideoFile(null); setFileError(''); return; }
         if (!file.type.startsWith('video/')) { setFileError('Please select a valid video file.'); return; }
         setFileError('');
@@ -34,39 +35,43 @@ const CreateFood = () => {
     const onDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const file = e.dataTransfer?.files?.[ 0 ];
-        if (!file) { return; }
+        const file = e.dataTransfer?.files?.[0];
+        if (!file) return;
         if (!file.type.startsWith('video/')) { setFileError('Please drop a valid video file.'); return; }
         setFileError('');
         setVideoFile(file);
     };
 
-    const onDragOver = (e) => {
-        e.preventDefault();
-    };
+    const onDragOver = (e) => e.preventDefault();
 
     const openFileDialog = () => fileInputRef.current?.click();
 
     const onSubmit = async (e) => {
         e.preventDefault();
+        if (!name.trim() || !videoFile) return;
 
-        const formData = new FormData();
+        setSubmitting(true);
+        try {
+            const formData = new FormData();
+            formData.append('name', name.trim());
+            formData.append('description', description.trim());
+            formData.append('video', videoFile); // field name must match multer's upload.single("video")
 
-        formData.append('name', name);
-        formData.append('description', description);
-        formData.append("mama", videoFile);
+            await axios.post("http://localhost:3001/api/food", formData, {
+                withCredentials: true,
+            });
 
-        const response = await axios.post("http://localhost:3001/api/food", formData, {
-            withCredentials: true,
-        })
-
-        console.log(response.data);
-        navigate("/"); // Redirect to home or another page after successful creation
-        // Optionally reset
-        // setName(''); setDescription(''); setVideoFile(null);
+            showToast("Food created successfully!", "success");
+            setTimeout(() => navigate("/"), 1200);
+        } catch (err) {
+            const msg = err.response?.data?.message || "Failed to create food. Please try again.";
+            showToast(msg, "error");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const isDisabled = useMemo(() => !name.trim() || !videoFile, [ name, videoFile ]);
+    const isDisabled = useMemo(() => !name.trim() || !videoFile || submitting, [name, videoFile, submitting]);
 
     return (
         <div className="create-food-page">
@@ -96,11 +101,12 @@ const CreateFood = () => {
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFileDialog(); } }}
                             onDrop={onDrop}
                             onDragOver={onDragOver}
+                            aria-label="Upload video file"
                         >
                             <div className="file-dropzone-inner">
                                 <svg className="file-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path d="M10.8 3.2a1 1 0 0 1 .4-.08h1.6a1 1 0 0 1 1 1v1.6h1.6a1 1 0 0 1 1 1v1.6h1.6a1 1 0 0 1 1 1v7.2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1h1.6V3.2a1 1 0 0 1 1-1h1.6a1 1 0 0 1 .6.2z" stroke="currentColor" strokeWidth="1.5" />
-                                    <path d="M9 12.75v-1.5c0-.62.67-1 1.2-.68l4.24 2.45c.53.3.53 1.05 0 1.35L10.2 16.82c-.53.31-1.2-.06-1.2-.68v-1.5" fill="currentColor" />
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" strokeWidth="1.5" />
+                                    <path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="currentColor" />
                                 </svg>
                                 <div className="file-dropzone-text">
                                     <strong>Tap to upload</strong> or drag and drop
@@ -114,7 +120,7 @@ const CreateFood = () => {
                         {videoFile && (
                             <div className="file-chip" aria-live="polite">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                    <path d="M9 12.75v-1.5c0-.62.67-1 1.2-.68l4.24 2.45c.53.3.53 1.05 0 1.35L10.2 16.82c-.53.31-1.2-.06-1.2-.68v-1.5" />
+                                    <path d="M10 8.5l5 3.5-5 3.5V8.5z" />
                                 </svg>
                                 <span className="file-chip-name">{videoFile.name}</span>
                                 <span className="file-chip-size">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>
@@ -133,7 +139,7 @@ const CreateFood = () => {
                     )}
 
                     <div className="field-group">
-                        <label htmlFor="foodName">Name</label>
+                        <label htmlFor="foodName">Name <span aria-hidden="true">*</span></label>
                         <input
                             id="foodName"
                             type="text"
@@ -141,6 +147,7 @@ const CreateFood = () => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
+                            maxLength={100}
                         />
                     </div>
 
@@ -152,16 +159,25 @@ const CreateFood = () => {
                             placeholder="Write a short description: ingredients, taste, spice level, etc."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            maxLength={500}
                         />
                     </div>
 
                     <div className="form-actions">
                         <button className="btn-primary" type="submit" disabled={isDisabled}>
-                            Save Food
+                            {submitting ? "Uploading…" : "Save Food"}
                         </button>
                     </div>
                 </form>
             </div>
+
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 };

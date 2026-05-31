@@ -109,6 +109,16 @@ button.auth-submit:focus-visible { outline: 2px solid var(--color-accent-hover);
 
 .auth-alt-action a { font-weight: 600; }
 
+.auth-error {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+  color: var(--color-danger);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: .875rem;
+  text-align: center;
+}
+
 .small-note { font-size: .7rem; color: var(--color-text-secondary); line-height: 1.2; }
 
 /* Utility for spacing adjustments */

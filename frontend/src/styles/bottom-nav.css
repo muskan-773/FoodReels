@@ -20,7 +20,7 @@
   margin: 0 auto;
   height: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .bottom-nav__item {
@@ -28,13 +28,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   gap: 2px;
+  transition: color var(--transition-base);
 }
 
 .bottom-nav__item.is-active {
-  color: var(--color-text);
+  color: #fff;
+}
+
+.bottom-nav__item:hover {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .bottom-nav__icon {

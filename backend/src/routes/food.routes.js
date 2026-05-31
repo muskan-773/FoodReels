@@ -18,6 +18,29 @@ router.get("/", foodController.getFoodItems);
 
 
 /* ============================= */
+/*         USER ROUTES           */
+/* ============================= */
+
+// Like food → Only logged in user
+router.post("/like",
+    authMiddleware.authUserMiddleware,
+    foodController.likeFood
+);
+
+// Save / unsave food → Only logged in user
+router.post("/save",
+    authMiddleware.authUserMiddleware,
+    foodController.saveFood
+);
+
+// Get saved foods → Only logged in user  (must be before /:id)
+router.get("/save",
+    authMiddleware.authUserMiddleware,
+    foodController.getSaveFood
+);
+
+
+/* ============================= */
 /*      FOOD PARTNER ROUTES     */
 /* ============================= */
 
@@ -30,25 +53,11 @@ router.post("/",
 
 
 /* ============================= */
-/*         USER ROUTES           */
+/*   PARAMETERISED PUBLIC ROUTE  */
 /* ============================= */
 
-// Like food → Only logged in user
-router.post("/like",
-    authMiddleware.authUserMiddleware,
-    foodController.likeFood
-);
+// GET /api/food/:id  → Public (single food item) — must be LAST
+router.get("/:id", foodController.getFoodItemById);
 
-// Save food → Only logged in user
-router.post("/save",
-    authMiddleware.authUserMiddleware,
-    foodController.saveFood
-);
-
-// Get saved foods → Only logged in user
-router.get("/save",
-    authMiddleware.authUserMiddleware,
-    foodController.getSaveFood
-);
 
 module.exports = router;
