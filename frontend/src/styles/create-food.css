@@ -155,6 +155,49 @@
   object-fit: contain;
 }
 
+/* ── Description label row (label + AI button side by side) ── */
+.desc-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* ── AI Generate button ── */
+.btn-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 150ms ease, transform 150ms ease;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+.btn-ai:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+.btn-ai:active:not(:disabled) { transform: translateY(0); }
+.btn-ai:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+/* Spinner inside button */
+.btn-ai__spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ai-spin 600ms linear infinite;
+  flex-shrink: 0;
+}
+@keyframes ai-spin { to { transform: rotate(360deg); } }
+
 /* Actions */
 .form-actions { display: flex; gap: var(--space-3); }
 

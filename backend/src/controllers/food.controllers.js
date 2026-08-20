@@ -2,6 +2,7 @@ const foodModel = require('../models/food.model');
 const storageService = require('../services/storage.service');
 const likeModel = require("../models/likes.model");
 const saveModel = require("../models/save.model");
+const aiService = require("../services/ai.service");
 
 
 async function createFood(req, res) {
@@ -146,10 +147,39 @@ async function getFoodItemById(req, res) {
 }
 
 
+async function generateDescription(req, res) {
+    try {
+        const { foodName, category } = req.body;
+
+        if (!foodName || !foodName.trim()) {
+            return res.status(400).json({ message: "foodName is required" });
+        }
+
+        const description = await aiService.generateFoodDescription(
+            foodName.trim(),
+            category?.trim() || ""
+        );
+
+        res.status(200).json({ description });
+
+    } catch (error) {
+        console.error("AI generation error:", error.message);
+
+        // Surface a clean message — never expose raw API errors
+        if (error.message.includes("GEMINI_API_KEY")) {
+            return res.status(500).json({ message: "AI service is not configured on this server." });
+        }
+
+        res.status(500).json({ message: "Failed to generate description. Please try again." });
+    }
+}
+
+
 module.exports = {
     createFood,
     getFoodItems,
     getFoodItemById,
+    generateDescription,
     likeFood,
     saveFood,
     getSaveFood

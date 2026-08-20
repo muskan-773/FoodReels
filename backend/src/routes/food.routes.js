@@ -44,6 +44,12 @@ router.get("/save",
 /*      FOOD PARTNER ROUTES     */
 /* ============================= */
 
+// POST /api/food/generate-description → AI description (food partner only, must be before /:id)
+router.post("/generate-description",
+    authMiddleware.authFoodPartnerMiddleware,
+    foodController.generateDescription
+);
+
 // POST /api/food  → Only Food Partner can create food
 router.post("/",
     authMiddleware.authFoodPartnerMiddleware,

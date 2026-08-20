@@ -11,11 +11,35 @@ const CreateFood = () => {
     const [videoURL, setVideoURL] = useState('');
     const [fileError, setFileError] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false); // ← AI state
     const [toast, setToast] = useState(null);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
     const showToast = (message, type = 'info') => setToast({ message, type });
+
+    // ── AI description generator ──────────────────────────────
+    const generateDescription = async () => {
+        if (!name.trim()) {
+            showToast("Enter a food name first so AI knows what to describe.", "error");
+            return;
+        }
+        setAiLoading(true);
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/api/food/generate-description",
+                { foodName: name.trim() },
+                { withCredentials: true }
+            );
+            setDescription(response.data.description);
+            showToast("Description generated! Feel free to edit it.", "success");
+        } catch (err) {
+            const msg = err.response?.data?.message || "AI generation failed. Please try again.";
+            showToast(msg, "error");
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!videoFile) { setVideoURL(''); return; }
@@ -152,11 +176,29 @@ const CreateFood = () => {
                     </div>
 
                     <div className="field-group">
-                        <label htmlFor="foodDesc">Description</label>
+                        <div className="desc-label-row">
+                            <label htmlFor="foodDesc">Description</label>
+                            <button
+                                type="button"
+                                className="btn-ai"
+                                onClick={generateDescription}
+                                disabled={aiLoading || !name.trim()}
+                                aria-label="Generate description with AI"
+                            >
+                                {aiLoading ? (
+                                    <>
+                                        <span className="btn-ai__spinner" aria-hidden="true" />
+                                        Generating…
+                                    </>
+                                ) : (
+                                    <>✨ Generate with AI</>
+                                )}
+                            </button>
+                        </div>
                         <textarea
                             id="foodDesc"
                             rows={4}
-                            placeholder="Write a short description: ingredients, taste, spice level, etc."
+                            placeholder="Write a short description or click ✨ Generate with AI"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             maxLength={500}
