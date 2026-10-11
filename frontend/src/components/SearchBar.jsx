@@ -1,17 +1,10 @@
 import React, { useRef } from 'react';
+import { Search as SearchIcon, X } from 'lucide-react';
 
-/**
- * SearchBar component.
- * Props:
- *   value       – controlled input value
- *   onChange    – (value: string) => void
- *   placeholder – input placeholder text
- *   onClear     – optional callback when clear button is clicked
- */
 const SearchBar = ({
     value = '',
     onChange,
-    placeholder = 'Search food…',
+    placeholder = 'Search dishes, cuisines, or restaurants…',
     onClear,
 }) => {
     const inputRef = useRef(null);
@@ -27,37 +20,32 @@ const SearchBar = ({
             style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                background: 'var(--color-surface-alt)',
+                gap: '10px',
+                background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
-                borderRadius: '999px',
-                padding: '10px 16px',
-                transition: 'border-color 120ms ease, box-shadow 120ms ease',
+                borderRadius: 'var(--radius-full)',
+                padding: '11px 18px',
+                transition: 'all var(--transition-fast)',
+                boxShadow: 'var(--shadow-sm)'
             }}
             onFocusCapture={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-accent)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                e.currentTarget.style.background = 'var(--color-surface-elevated)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(226, 80, 55, 0.15)';
             }}
             onBlurCapture={(e) => {
                 e.currentTarget.style.borderColor = 'var(--color-border)';
-                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'var(--color-surface)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
             }}
         >
-            {/* Search icon */}
-            <svg
-                width="18" height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--color-text-secondary)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+            <SearchIcon
+                size={18}
+                strokeWidth={2}
+                color="var(--color-text-muted)"
                 style={{ flexShrink: 0 }}
-            >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+                aria-hidden="true"
+            />
 
             <input
                 ref={inputRef}
@@ -72,7 +60,7 @@ const SearchBar = ({
                     border: 'none',
                     outline: 'none',
                     font: 'inherit',
-                    fontSize: '1rem',
+                    fontSize: '0.92rem',
                     color: 'var(--color-text)',
                     minWidth: 0,
                 }}
@@ -84,19 +72,20 @@ const SearchBar = ({
                     onClick={handleClear}
                     aria-label="Clear search"
                     style={{
-                        background: 'none',
+                        background: 'rgba(255, 255, 255, 0.08)',
                         border: 'none',
+                        borderRadius: '50%',
+                        width: '22px',
+                        height: '22px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         cursor: 'pointer',
                         color: 'var(--color-text-secondary)',
-                        padding: '2px',
-                        lineHeight: 0,
                         flexShrink: 0,
                     }}
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
+                    <X size={13} strokeWidth={2.5} />
                 </button>
             )}
         </div>

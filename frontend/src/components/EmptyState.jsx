@@ -1,15 +1,8 @@
 import React from 'react';
+import { UtensilsCrossed } from 'lucide-react';
 
-/**
- * EmptyState component for when a list has no items.
- * Props:
- *   icon    – optional emoji or JSX icon
- *   title   – main heading
- *   message – supporting text
- *   action  – optional { label, onClick } for a CTA button
- */
 const EmptyState = ({
-    icon = '🍽️',
+    icon = null,
     title = 'Nothing here yet',
     message = '',
     action = null,
@@ -22,40 +15,47 @@ const EmptyState = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '12px',
-                padding: '60px 24px',
+                padding: '64px 24px',
                 textAlign: 'center',
                 color: 'var(--color-text-secondary)',
             }}
             role="status"
             aria-label={title}
         >
-            {icon && (
-                <span style={{ fontSize: '3rem', lineHeight: 1 }} aria-hidden="true">
-                    {icon}
-                </span>
-            )}
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
+            <div
+                style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid var(--color-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--color-accent-gold)',
+                    marginBottom: '4px'
+                }}
+            >
+                {icon ? (
+                    typeof icon === 'string' ? <span style={{ fontSize: '1.6rem' }}>{icon}</span> : icon
+                ) : (
+                    <UtensilsCrossed size={24} strokeWidth={1.8} />
+                )}
+            </div>
+
+            <h2 className="font-editorial" style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--color-text)', margin: 0 }}>
                 {title}
             </h2>
             {message && (
-                <p style={{ fontSize: '.9rem', maxWidth: '280px', lineHeight: 1.5, margin: 0 }}>
+                <p style={{ fontSize: '0.88rem', maxWidth: '340px', lineHeight: 1.5, margin: 0, color: 'var(--color-text-secondary)' }}>
                     {message}
                 </p>
             )}
             {action && (
                 <button
                     onClick={action.onClick}
-                    style={{
-                        marginTop: '8px',
-                        background: 'var(--color-accent)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '999px',
-                        padding: '10px 20px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        fontSize: '.9rem',
-                    }}
+                    className="btn-editorial btn-editorial--secondary"
+                    style={{ marginTop: '8px' }}
                 >
                     {action.label}
                 </button>

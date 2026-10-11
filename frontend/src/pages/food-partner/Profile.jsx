@@ -2,22 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { partnerApi } from '../../services/api';
 import '../../styles/partner-profile.css';
+import {
+    ArrowLeft,
+    MapPin,
+    Phone,
+    Mail,
+    Heart,
+    Bookmark,
+    Play,
+    Store,
+    Film,
+    X,
+    UtensilsCrossed
+} from 'lucide-react';
+import EmptyState from '../../components/EmptyState';
 
 function getInitials(name = '') {
-    return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
-}
-const GRAD = [
-    'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
-    'linear-gradient(135deg,#11998e,#38ef7d)',
-    'linear-gradient(135deg,#fc4a1a,#f7b733)',
-    'linear-gradient(135deg,#4776e6,#8e54e9)',
-    'linear-gradient(135deg,#f953c6,#b91d73)',
-    'linear-gradient(135deg,#43cea2,#185a9d)',
-];
-function getGrad(name = '') {
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-    return GRAD[Math.abs(h) % GRAD.length];
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(w => w[0]?.toUpperCase() ?? '')
+        .join('');
 }
 
 const PartnerProfile = () => {
@@ -33,99 +39,117 @@ const PartnerProfile = () => {
         partnerApi.getById(id)
             .then(res => {
                 setProfile(res.data.foodPartner);
-                setVideos(res.data.foodPartner.foodItems || []);
+                setVideos(res.data.foodPartner?.foodItems || []);
             })
-            .catch(err => setError(err.response?.data?.message || 'Failed to load profile.'))
+            .catch(err => setError(err.response?.data?.message || 'Failed to load restaurant profile.'))
             .finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return (
-        <div className="pp-loading">
-            <div className="pp-spinner" />
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="pp-loading">
+                <div className="pp-spinner" />
+            </div>
+        );
+    }
 
-    if (error || !profile) return (
-        <div className="pp-error">
-            <p>{error || 'Profile not found.'}</p>
-            <button onClick={() => navigate(-1)}>← Go back</button>
-        </div>
-    );
+    if (error || !profile) {
+        return (
+            <div className="pp-page">
+                <div className="pp-error">
+                    <p>{error || 'Partner kitchen profile not found.'}</p>
+                    <button onClick={() => navigate(-1)}>Return to Discoveries</button>
+                </div>
+            </div>
+        );
+    }
 
-    const totalLikes  = videos.reduce((s, v) => s + (v.likeCount  ?? 0), 0);
-    const totalSaves  = videos.reduce((s, v) => s + (v.savesCount ?? 0), 0);
-    const grad        = getGrad(profile.name);
-    const initials    = getInitials(profile.name);
+    const totalLikes = videos.reduce((s, v) => s + (v.likeCount ?? 0), 0);
+    const totalSaves = videos.reduce((s, v) => s + (v.savesCount ?? 0), 0);
+    const initials = getInitials(profile.name);
 
     return (
         <div className="pp-page">
-
-            {/* ── Back ── */}
+            {/* ── Back Navigation ── */}
             <button className="pp-back" onClick={() => navigate(-1)} aria-label="Go back">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-                Back
+                <ArrowLeft size={16} />
+                <span>Back to feed</span>
             </button>
 
-            {/* ── Hero banner ── */}
-            <div className="pp-hero" style={{ background: grad }}>
-                <div className="pp-hero-overlay" />
-                <div className="pp-hero-content">
-                    <div className="pp-avatar" style={{ background: grad }} aria-label={profile.name}>
-                        {initials}
+            {/* ── Editorial Restaurant Header ── */}
+            <div className="pp-hero">
+                <div className="pp-hero-badge">
+                    <Store size={12} />
+                    <span>Verified Culinary Partner</span>
+                </div>
+
+                <div className="pp-hero-main">
+                    <div className="pp-avatar" aria-label={profile.name}>
+                        {initials || <UtensilsCrossed size={32} />}
                     </div>
+
                     <div className="pp-hero-text">
                         <h1 className="pp-name">{profile.name}</h1>
-                        <p className="pp-contact">by {profile.contactName}</p>
+                        <p className="pp-contact">Curated by {profile.contactName || 'Head Chef'}</p>
                     </div>
                 </div>
             </div>
 
-            {/* ── Info card ── */}
-            <div className="pp-info-card">
-                <div className="pp-info-row">
-                    <span className="pp-info-icon">📍</span>
-                    <span>{profile.address}</span>
-                </div>
-                {profile.phone && (
-                    <div className="pp-info-row">
-                        <span className="pp-info-icon">📞</span>
-                        <a href={`tel:${profile.phone}`} className="pp-info-link">{profile.phone}</a>
+            {/* ── Restaurant Contact & Location ── */}
+            <div className="pp-info-bar">
+                {profile.address && (
+                    <div className="pp-info-item">
+                        <MapPin size={16} />
+                        <span>{profile.address}</span>
                     </div>
                 )}
-                <div className="pp-info-row">
-                    <span className="pp-info-icon">✉️</span>
-                    <a href={`mailto:${profile.email}`} className="pp-info-link">{profile.email}</a>
-                </div>
-            </div>
-
-            {/* ── Stats ── */}
-            <div className="pp-stats">
-                <div className="pp-stat">
-                    <span className="pp-stat-value">{videos.length}</span>
-                    <span className="pp-stat-label">Reels</span>
-                </div>
-                <div className="pp-stat-divider" />
-                <div className="pp-stat">
-                    <span className="pp-stat-value">{totalLikes}</span>
-                    <span className="pp-stat-label">Likes</span>
-                </div>
-                <div className="pp-stat-divider" />
-                <div className="pp-stat">
-                    <span className="pp-stat-value">{totalSaves}</span>
-                    <span className="pp-stat-label">Saves</span>
-                </div>
-            </div>
-
-            {/* ── Video grid ── */}
-            <section className="pp-grid-section">
-                <h2 className="pp-grid-title">Food Reels</h2>
-                {videos.length === 0 ? (
-                    <div className="pp-empty">
-                        <span>🍽️</span>
-                        <p>No reels uploaded yet.</p>
+                {profile.phone && (
+                    <div className="pp-info-item">
+                        <Phone size={16} />
+                        <a href={`tel:${profile.phone}`} className="pp-info-link">
+                            {profile.phone}
+                        </a>
                     </div>
+                )}
+                {profile.email && (
+                    <div className="pp-info-item">
+                        <Mail size={16} />
+                        <a href={`mailto:${profile.email}`} className="pp-info-link">
+                            {profile.email}
+                        </a>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Key Metrics ── */}
+            <div className="pp-stats">
+                <div className="pp-stat-card">
+                    <span className="pp-stat-value">{videos.length}</span>
+                    <span className="pp-stat-label">Signature Reels</span>
+                </div>
+                <div className="pp-stat-card">
+                    <span className="pp-stat-value">{totalLikes}</span>
+                    <span className="pp-stat-label">Total Appreciations</span>
+                </div>
+                <div className="pp-stat-card">
+                    <span className="pp-stat-value">{totalSaves}</span>
+                    <span className="pp-stat-label">Saved to Collections</span>
+                </div>
+            </div>
+
+            {/* ── Video Gallery ── */}
+            <section className="pp-grid-section">
+                <div className="pp-section-header">
+                    <h2 className="pp-grid-title">Culinary Reels</h2>
+                    <span className="pp-grid-count">{videos.length} dishes published</span>
+                </div>
+
+                {videos.length === 0 ? (
+                    <EmptyState
+                        icon={<Film size={28} />}
+                        title="No reels published yet"
+                        message="This kitchen has not uploaded video reels to their menu gallery yet."
+                    />
                 ) : (
                     <div className="pp-grid">
                         {videos.map(v => (
@@ -137,17 +161,28 @@ const PartnerProfile = () => {
                             >
                                 <video
                                     src={v.video}
-                                    muted playsInline preload="metadata"
+                                    muted
+                                    playsInline
+                                    preload="metadata"
                                     className="pp-grid-video"
                                 />
                                 <div className="pp-grid-overlay">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-                                        <polygon points="5 3 19 12 5 21 5 3" />
-                                    </svg>
-                                </div>
-                                <div className="pp-grid-meta">
-                                    <span className="pp-grid-name">{v.name}</span>
-                                    <span className="pp-grid-likes">❤️ {v.likeCount ?? 0}</span>
+                                    <div className="pp-play-badge">
+                                        <Play size={14} fill="currentColor" />
+                                    </div>
+                                    <div className="pp-grid-info">
+                                        <div className="pp-grid-name">{v.name}</div>
+                                        <div className="pp-grid-metrics">
+                                            <span className="pp-grid-metric">
+                                                <Heart size={12} fill="var(--color-primary)" color="var(--color-primary)" />
+                                                {v.likeCount ?? 0}
+                                            </span>
+                                            <span className="pp-grid-metric">
+                                                <Bookmark size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                                                {v.savesCount ?? 0}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </button>
                         ))}
@@ -155,22 +190,44 @@ const PartnerProfile = () => {
                 )}
             </section>
 
-            {/* ── Video lightbox ── */}
+            {/* ── Video Lightbox Modal ── */}
             {activeVideo && (
-                <div className="pp-lightbox" onClick={() => setActiveVideo(null)} role="dialog" aria-modal="true">
+                <div
+                    className="pp-lightbox"
+                    onClick={() => setActiveVideo(null)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={activeVideo.name}
+                >
                     <div className="pp-lightbox-inner" onClick={e => e.stopPropagation()}>
-                        <button className="pp-lightbox-close" onClick={() => setActiveVideo(null)} aria-label="Close">✕</button>
+                        <button
+                            className="pp-lightbox-close"
+                            onClick={() => setActiveVideo(null)}
+                            aria-label="Close reel modal"
+                        >
+                            <X size={18} />
+                        </button>
                         <video
                             src={activeVideo.video}
-                            controls autoPlay playsInline
+                            controls
+                            autoPlay
+                            playsInline
                             className="pp-lightbox-video"
                         />
-                        <div className="pp-lightbox-info">
-                            <h3>{activeVideo.name}</h3>
-                            {activeVideo.description && <p>{activeVideo.description}</p>}
+                        <div className="pp-lightbox-content">
+                            <h3 className="pp-lightbox-title">{activeVideo.name}</h3>
+                            {activeVideo.description && (
+                                <p className="pp-lightbox-desc">{activeVideo.description}</p>
+                            )}
                             <div className="pp-lightbox-stats">
-                                <span>❤️ {activeVideo.likeCount ?? 0} likes</span>
-                                <span>🔖 {activeVideo.savesCount ?? 0} saves</span>
+                                <span className="pp-grid-metric">
+                                    <Heart size={14} fill="var(--color-primary)" color="var(--color-primary)" />
+                                    {activeVideo.likeCount ?? 0} foodies loved this
+                                </span>
+                                <span className="pp-grid-metric">
+                                    <Bookmark size={14} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                                    {activeVideo.savesCount ?? 0} saved
+                                </span>
                             </div>
                         </div>
                     </div>

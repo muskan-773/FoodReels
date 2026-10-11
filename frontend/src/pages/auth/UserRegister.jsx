@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/auth-shared.css';
 import { authApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { UtensilsCrossed, User, Store, ArrowRight } from 'lucide-react';
 
 const UserRegister = () => {
     const navigate = useNavigate();
@@ -52,16 +53,21 @@ const UserRegister = () => {
         <div className="auth-page-wrapper">
             <div className="auth-card" role="region" aria-labelledby="user-register-title">
                 <header>
-                    <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🍔</div>
-                    <h1 id="user-register-title" className="auth-title">Create your foodie account</h1>
-                    <p className="auth-subtitle">Join to discover, rate, and save delicious meals near you.</p>
+                    <div className="auth-brand-badge">
+                        <UtensilsCrossed size={16} /> FoodReels
+                    </div>
+                    <h1 id="user-register-title" className="auth-title">Join as a Foodie</h1>
+                    <p className="auth-subtitle">Discover gastronomic masterpieces and curated culinary reels.</p>
                 </header>
 
-                <nav className="auth-alt-action" style={{ marginTop: '-4px' }}>
-                    <strong style={{ fontWeight: 600 }}>Switch Role:</strong>{' '}
-                    <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>Foodie User</span> •{' '}
-                    <Link to="/food-partner/register">Restaurant Partner</Link>
-                </nav>
+                <div className="auth-role-tabs">
+                    <div className="auth-role-tab active">
+                        <User size={14} /> Foodie Member
+                    </div>
+                    <Link to="/food-partner/register" className="auth-role-tab">
+                        <Store size={14} /> Kitchen Partner
+                    </Link>
+                </div>
 
                 {error && (
                     <p className="auth-error" role="alert">{error}</p>
@@ -71,23 +77,24 @@ const UserRegister = () => {
                     <div className="two-col">
                         <div className="field-group">
                             <label htmlFor="firstName">First Name</label>
-                            <input id="firstName" name="firstName" placeholder="Jane" autoComplete="given-name" required />
+                            <input id="firstName" name="firstName" placeholder="Elena" autoComplete="given-name" required />
                         </div>
                         <div className="field-group">
                             <label htmlFor="lastName">Last Name</label>
-                            <input id="lastName" name="lastName" placeholder="Doe" autoComplete="family-name" />
+                            <input id="lastName" name="lastName" placeholder="Rostova" autoComplete="family-name" />
                         </div>
                     </div>
                     <div className="field-group">
                         <label htmlFor="email">Email Address</label>
-                        <input id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required />
+                        <input id="email" name="email" type="email" placeholder="elena@domain.com" autoComplete="email" required />
                     </div>
                     <div className="field-group">
                         <label htmlFor="password">Password (min 6 chars)</label>
-                        <input id="password" name="password" type="password" placeholder="••••••••" autoComplete="new-password" required minLength={6} />
+                        <input id="password" name="password" type="password" placeholder="Create a password" autoComplete="new-password" required minLength={6} />
                     </div>
                     <button className="auth-submit" type="submit" disabled={loading}>
-                        {loading ? "Creating account…" : "Sign Up"}
+                        {loading ? "Creating account…" : "Create Foodie Account"}
+                        {!loading && <ArrowRight size={16} />}
                     </button>
                 </form>
 

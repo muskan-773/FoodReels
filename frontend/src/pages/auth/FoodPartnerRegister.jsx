@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/auth-shared.css';
 import { authApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { UtensilsCrossed, User, Store, ArrowRight } from 'lucide-react';
 
 const FoodPartnerRegister = () => {
     const navigate = useNavigate();
@@ -57,16 +58,22 @@ const FoodPartnerRegister = () => {
         <div className="auth-page-wrapper">
             <div className="auth-card" role="region" aria-labelledby="partner-register-title">
                 <header>
-                    <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🍴</div>
+                    <div className="auth-brand-badge">
+                        <UtensilsCrossed size={16} /> FoodReels
+                    </div>
                     <h1 id="partner-register-title" className="auth-title">Partner Sign Up</h1>
-                    <p className="auth-subtitle">Showcase your culinary masterpieces to thousands of local foodies.</p>
+                    <p className="auth-subtitle">Showcase your culinary masterpieces to discerning foodies.</p>
                 </header>
 
-                <nav className="auth-alt-action" style={{ marginTop: '-4px' }}>
-                    <strong style={{ fontWeight: 600 }}>Switch Role:</strong>{' '}
-                    <Link to="/user/register">Foodie User</Link> •{' '}
-                    <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>Restaurant Partner</span>
-                </nav>
+                {/* Role Switcher Tabs */}
+                <div className="auth-role-tabs">
+                    <Link to="/user/register" className="auth-role-tab">
+                        <User size={14} /> Foodie Member
+                    </Link>
+                    <div className="auth-role-tab active">
+                        <Store size={14} /> Kitchen Partner
+                    </div>
+                </div>
 
                 {error && (
                     <p className="auth-error" role="alert">{error}</p>
@@ -74,33 +81,34 @@ const FoodPartnerRegister = () => {
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                     <div className="field-group">
-                        <label htmlFor="businessName">Restaurant / Business Name</label>
+                        <label htmlFor="businessName">Restaurant / Kitchen Name</label>
                         <input id="businessName" name="businessName" placeholder="e.g. Bella Napoli Pizzeria" autoComplete="organization" required />
                     </div>
                     <div className="two-col">
                         <div className="field-group">
-                            <label htmlFor="contactName">Owner / Manager Name</label>
-                            <input id="contactName" name="contactName" placeholder="Jane Doe" autoComplete="name" required />
+                            <label htmlFor="contactName">Chef / General Manager</label>
+                            <input id="contactName" name="contactName" placeholder="Marco Rossi" autoComplete="name" required />
                         </div>
                         <div className="field-group">
-                            <label htmlFor="phone">Business Phone</label>
-                            <input id="phone" name="phone" placeholder="+1 555-019-2831" autoComplete="tel" required />
+                            <label htmlFor="phone">Direct Phone</label>
+                            <input id="phone" name="phone" placeholder="+1 212-555-0199" autoComplete="tel" required />
                         </div>
                     </div>
                     <div className="field-group">
                         <label htmlFor="email">Business Email</label>
-                        <input id="email" name="email" type="email" placeholder="contact@restaurant.com" autoComplete="email" required />
+                        <input id="email" name="email" type="email" placeholder="marco@bellanapoli.com" autoComplete="email" required />
                     </div>
                     <div className="field-group">
                         <label htmlFor="password">Password (min 6 chars)</label>
                         <input id="password" name="password" type="password" placeholder="Create password" autoComplete="new-password" required minLength={6} />
                     </div>
                     <div className="field-group">
-                        <label htmlFor="address">Physical Address (for customer store visits)</label>
-                        <input id="address" name="address" placeholder="123 Market Street, New York, NY" autoComplete="street-address" required />
+                        <label htmlFor="address">Physical Dining Address</label>
+                        <input id="address" name="address" placeholder="142 Mulberry St, New York, NY" autoComplete="street-address" required />
                     </div>
                     <button className="auth-submit" type="submit" disabled={loading}>
-                        {loading ? "Creating partner account…" : "Register Food Partner Account"}
+                        {loading ? "Creating partner account…" : "Register Culinary Kitchen"}
+                        {!loading && <ArrowRight size={16} />}
                     </button>
                 </form>
 

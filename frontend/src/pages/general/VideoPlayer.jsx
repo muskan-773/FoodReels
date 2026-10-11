@@ -2,7 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../../styles/video-player.css';
 import Toast from '../../components/Toast';
+import ShareSheet from '../../components/ShareSheet';
 import { foodApi } from '../../services/api';
+import {
+    ArrowLeft,
+    Heart,
+    Bookmark,
+    Share2,
+    Store,
+    Sparkles,
+    ChevronRight,
+    UtensilsCrossed
+} from 'lucide-react';
 
 const VideoPlayer = () => {
     const { id } = useParams();
@@ -14,6 +25,7 @@ const VideoPlayer = () => {
     const [toast, setToast] = useState(null);
     const [liked, setLiked] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
 
     const showToast = (message, type = 'info') => setToast({ message, type });
 
@@ -39,7 +51,7 @@ const VideoPlayer = () => {
                 likeCount: Math.max(0, (prev.likeCount ?? 0) + (isLiked ? 1 : -1))
             }));
         } catch (err) {
-            showToast(err.response?.data?.message || "Please log in to like.", "error");
+            showToast(err.response?.data?.message || "Please sign in to like dishes.", "error");
         }
     };
 
@@ -52,38 +64,48 @@ const VideoPlayer = () => {
                 ...prev,
                 savesCount: Math.max(0, (prev.savesCount ?? 0) + (isSaved ? 1 : -1))
             }));
-            showToast(isSaved ? "Saved to collection!" : "Removed from saved.", "success");
+            showToast(isSaved ? "Saved to your culinary collection!" : "Removed from collection.", "success");
         } catch (err) {
-            showToast(err.response?.data?.message || "Please log in to save.", "error");
+            showToast(err.response?.data?.message || "Please sign in to save dishes.", "error");
         }
     };
 
     if (loading) {
         return (
-            <div className="vp-page" style={{ paddingTop: '80px' }}>
-                <div className="vp-loading" aria-busy="true">Loading reel…</div>
+            <div className="vp-page">
+                <div className="vp-loading">
+                    <div className="pp-spinner" />
+                    <p>Pouring reel into view…</p>
+                </div>
             </div>
         );
     }
 
     if (error || !food) {
         return (
-            <div className="vp-page" style={{ paddingTop: '80px' }}>
+            <div className="vp-page">
                 <div className="vp-error">
-                    <p>{error || "Video not found."}</p>
-                    <button onClick={() => navigate(-1)} className="vp-back-btn">← Go back</button>
+                    <p>{error || "Culinary reel not found."}</p>
+                    <button onClick={() => navigate(-1)} className="vp-back-btn">
+                        <ArrowLeft size={16} /> Return to Discoveries
+                    </button>
                 </div>
             </div>
         );
     }
 
+    const partnerId = typeof food.foodPartner === 'object' ? food.foodPartner?._id : food.foodPartner;
+    const partnerName = typeof food.foodPartner === 'object' ? food.foodPartner?.name : 'Partner Kitchen';
+
     return (
-        <div className="vp-page" style={{ paddingTop: '80px' }}>
+        <div className="vp-page">
             <button className="vp-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
-                ← Back
+                <ArrowLeft size={16} />
+                <span>Back to feed</span>
             </button>
 
             <div className="vp-layout">
+                {/* ── Left: Video Reel ── */}
                 <div className="vp-video-wrap">
                     <video
                         ref={videoRef}
@@ -96,55 +118,101 @@ const VideoPlayer = () => {
                     />
                 </div>
 
+                {/* ── Right: Dish Editorial Info ── */}
                 <aside className="vp-info">
-                    <h1 className="vp-title">{food.name}</h1>
-
-                    {/* Dietary / Cuisine Badges */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '4px 0 10px' }}>
-                        {food.cuisine && <span className="badge-tag tag-cuisine">🍴 {food.cuisine}</span>}
-                        {food.dietaryTags?.map(tag => (
-                            <span key={tag} className="badge-tag">{tag}</span>
-                        ))}
+                    <div className="vp-badge-row">
+                        {food.cuisine && (
+                            <span className="vp-cuisine-badge">
+                                <UtensilsCrossed size={12} />
+                                {food.cuisine}
+                            </span>
+                        )}
+                        {food.price != null && Number(food.price) > 0 && (
+                            <span className="vp-price-badge">
+                                ${Number(food.price).toFixed(2)}
+                            </span>
+                        )}
                     </div>
 
-                    {food.description && (
-                        <p className="vp-description">{food.description}</p>
+                    <h1 className="vp-title">{food.name}</h1>
+
+                    {food.dietaryTags && food.dietaryTags.length > 0 && (
+                        <div className="vp-tag-list">
+                            {food.dietaryTags.map(tag => (
+                                <span key={tag} className="vp-tag">{tag}</span>
+                            ))}
+                        </div>
                     )}
 
+                    {food.description && (
+                        <div className="vp-description-block">
+                            <div className="vp-description-label">Chef's Tasting Notes</div>
+                            <p className="vp-description">{food.description}</p>
+                        </div>
+                    )}
+
+                    {/* ── Interactive Actions ── */}
                     <div className="vp-actions">
                         <button
-                            className={`vp-action-btn ${liked ? 'vp-action-btn--active' : ''}`}
+                            className={`vp-action-btn ${liked ? 'vp-action-btn--liked' : ''}`}
                             onClick={handleLike}
-                            aria-label={liked ? "Unlike" : "Like"}
+                            aria-label={liked ? "Unlike dish" : "Like dish"}
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
-                            </svg>
+                            <Heart
+                                size={18}
+                                fill={liked ? "currentColor" : "none"}
+                                color={liked ? "var(--color-primary)" : "currentColor"}
+                            />
                             <span>{food.likeCount ?? 0}</span>
                         </button>
 
                         <button
-                            className={`vp-action-btn ${saved ? 'vp-action-btn--active' : ''}`}
+                            className={`vp-action-btn ${saved ? 'vp-action-btn--saved' : ''}`}
                             onClick={handleSave}
-                            aria-label={saved ? "Unsave" : "Save"}
+                            aria-label={saved ? "Unsave dish" : "Save dish"}
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
-                            </svg>
+                            <Bookmark
+                                size={18}
+                                fill={saved ? "currentColor" : "none"}
+                                color={saved ? "var(--color-accent-gold)" : "currentColor"}
+                            />
                             <span>{food.savesCount ?? 0}</span>
+                        </button>
+
+                        <button
+                            className="vp-action-btn"
+                            onClick={() => setShareOpen(true)}
+                            aria-label="Share dish reel"
+                        >
+                            <Share2 size={18} />
+                            <span>Share</span>
                         </button>
                     </div>
 
-                    {food.foodPartner && (
-                        <Link
-                            to={`/food-partner/${typeof food.foodPartner === 'object' ? food.foodPartner._id : food.foodPartner}`}
-                            className="vp-partner-link"
-                        >
-                            🍴 {typeof food.foodPartner === 'object' ? food.foodPartner.name : 'Visit store'} →
+                    {/* ── Partner Kitchen Card ── */}
+                    {partnerId && (
+                        <Link to={`/food-partner/${partnerId}`} className="vp-partner-card">
+                            <div className="vp-partner-left">
+                                <div className="vp-partner-icon">
+                                    <Store size={20} />
+                                </div>
+                                <div>
+                                    <h4 className="vp-partner-title">{partnerName}</h4>
+                                    <p className="vp-partner-sub">Explore full menu & kitchen profile</p>
+                                </div>
+                            </div>
+                            <ChevronRight size={18} className="vp-partner-arrow" />
                         </Link>
                     )}
                 </aside>
             </div>
+
+            {/* ── Share Modal ── */}
+            <ShareSheet
+                isOpen={shareOpen}
+                onClose={() => setShareOpen(false)}
+                reel={food}
+            />
 
             {toast && (
                 <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />

@@ -92,7 +92,7 @@ If `GEMINI_API_KEY` is not provided or Gemini returns a rate-limit error, the en
 | **Authentication** | JWT + bcryptjs | Dual authentication: HTTP-only secure cookies + Bearer headers |
 | **AI Integration** | Google Gemini (`@google/generative-ai`) | Content generation & intelligent culinary recommendation |
 | **File Storage** | ImageKit Node SDK | Cloud storage and CDN optimization for video reels |
-| **Styling** | Custom Pure CSS Design System | Responsive mobile + desktop glassmorphism, zero bloated UI libraries |
+| **Styling & Icons** | Editorial Pure CSS Design System + Lucide React | Playfair Display serif, Plus Jakarta Sans, dark caviar palette, zero bloated UI libraries |
 
 ---
 

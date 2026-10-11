@@ -1,15 +1,10 @@
 import React, { useRef, useState } from 'react';
+import { Heart, Bookmark, Play } from 'lucide-react';
 
 /**
- * VideoCard — compact thumbnail card for grid layouts (e.g. Profile page).
- * Props:
- *   video       – video URL
- *   name        – food name
- *   likeCount   – number of likes
- *   savesCount  – number of saves
- *   onClick     – optional click handler
+ * VideoCard — Refined editorial thumbnail card for grid layouts
  */
-const VideoCard = ({ video, name, likeCount = 0, savesCount = 0, onClick }) => {
+const VideoCard = ({ video, name, cuisine, price, likeCount = 0, savesCount = 0, onClick }) => {
     const videoRef = useRef(null);
     const [hovered, setHovered] = useState(false);
 
@@ -35,15 +30,19 @@ const VideoCard = ({ video, name, likeCount = 0, savesCount = 0, onClick }) => {
             style={{
                 position: 'relative',
                 aspectRatio: '3/4',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-lg)',
                 overflow: 'hidden',
                 cursor: onClick ? 'pointer' : 'default',
-                background: '#111',
+                background: 'var(--color-surface-elevated)',
+                border: '1px solid var(--color-border)',
+                transition: 'all var(--transition-smooth)',
+                transform: hovered ? 'translateY(-3px)' : 'none',
+                boxShadow: hovered ? 'var(--shadow-lg)' : 'var(--shadow-sm)'
             }}
             role={onClick ? 'button' : undefined}
             tabIndex={onClick ? 0 : undefined}
             onKeyDown={onClick ? (e) => { if (e.key === 'Enter') onClick(); } : undefined}
-            aria-label={name}
+            aria-label={`View ${name}`}
         >
             <video
                 ref={videoRef}
@@ -57,31 +56,97 @@ const VideoCard = ({ video, name, likeCount = 0, savesCount = 0, onClick }) => {
                     height: '100%',
                     objectFit: 'cover',
                     display: 'block',
+                    transition: 'transform 300ms ease',
+                    transform: hovered ? 'scale(1.04)' : 'scale(1)'
                 }}
             />
 
-            {/* Overlay on hover */}
+            {/* Always visible subtle bottom gradient for title clarity */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(12, 14, 18, 0.92) 0%, rgba(12, 14, 18, 0.4) 35%, transparent 65%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    padding: '12px 14px',
+                    gap: '4px',
+                    pointerEvents: 'none'
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                    <p style={{
+                        color: '#fff',
+                        fontFamily: 'var(--font-serif)',
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        margin: 0,
+                        lineHeight: 1.25,
+                        letterSpacing: '-0.01em',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {name}
+                    </p>
+                    {price > 0 && (
+                        <span style={{
+                            color: 'var(--color-accent-gold)',
+                            fontWeight: 700,
+                            fontSize: '0.78rem',
+                            fontVariantNumeric: 'tabular-nums'
+                        }}>
+                            ${price}
+                        </span>
+                    )}
+                </div>
+
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    color: 'var(--color-text-secondary)',
+                    fontSize: '0.72rem',
+                    fontVariantNumeric: 'tabular-nums'
+                }}>
+                    <span style={{ textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-text-muted)' }}>
+                        {cuisine || 'Featured'}
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <Heart size={11} strokeWidth={2.2} fill={likeCount > 0 ? "rgba(255,255,255,0.7)" : "none"} />
+                            {likeCount}
+                        </span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <Bookmark size={11} strokeWidth={2.2} />
+                            {savesCount}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Hover Play Indicator */}
             {hovered && (
                 <div
                     style={{
                         position: 'absolute',
-                        inset: 0,
-                        background: 'linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%)',
+                        top: '12px',
+                        right: '12px',
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '50%',
+                        background: 'rgba(12, 14, 18, 0.75)',
+                        backdropFilter: 'blur(8px)',
                         display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'flex-end',
-                        padding: '10px',
-                        gap: '4px',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}
                     aria-hidden="true"
                 >
-                    <p style={{ color: '#fff', fontWeight: 700, fontSize: '.85rem', margin: 0, lineHeight: 1.2 }}>
-                        {name}
-                    </p>
-                    <div style={{ display: 'flex', gap: '10px', color: 'rgba(255,255,255,.8)', fontSize: '.75rem' }}>
-                        <span>❤️ {likeCount}</span>
-                        <span>🔖 {savesCount}</span>
-                    </div>
+                    <Play size={13} fill="white" strokeWidth={0} style={{ marginLeft: '2px' }} />
                 </div>
             )}
         </div>

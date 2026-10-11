@@ -1,90 +1,97 @@
 /* ==============================================================================
-   FoodReels Design System - Gourmet Human-Crafted Theme
+   FoodReels Editorial Design System
+   "Gastronomy in Motion" — Refined, Human-Crafted Culinary Interface
    ============================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
 :root {
-  /* Brand Palettes */
-  --color-primary: #ff4757;
-  --color-primary-hover: #e84118;
-  --color-primary-glow: rgba(255, 71, 87, 0.35);
+  /* Editorial Color Palette */
+  --color-bg: #0c0e12;               /* Deep Velvety Caviar */
+  --color-surface: #14171f;          /* Midnight Slate */
+  --color-surface-elevated: #1a1f2a; /* Slate Card */
+  --color-surface-hover: #222938;    /* Interactive Card Hover */
+  --color-surface-glass: rgba(18, 22, 30, 0.78);
   
-  --color-accent-gold: #ffa502;
-  --color-accent-green: #2ed573;
-  --color-accent-purple: #a55eea;
+  /* Refined Culinary Accents */
+  --color-primary: #e25037;          /* Tuscan Terracotta / Red Ochre */
+  --color-primary-hover: #cf4128;
+  --color-primary-subtle: rgba(226, 80, 55, 0.12);
+  --color-primary-border: rgba(226, 80, 55, 0.35);
 
-  /* Surfaces & Dark Mode Default (Gourmet Cinematic Experience) */
-  --color-bg: #090c10;
-  --color-surface: #121721;
-  --color-surface-hover: #1a2232;
-  --color-surface-alt: #161c28;
-  --color-surface-glass: rgba(18, 23, 33, 0.75);
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-border-glow: rgba(255, 71, 87, 0.25);
+  --color-accent-gold: #df9e38;      /* Warm Saffron */
+  --color-accent-gold-subtle: rgba(223, 158, 56, 0.12);
+  --color-accent-green: #48a574;     /* Garden Basil */
+  --color-accent-green-subtle: rgba(72, 165, 116, 0.12);
 
-  /* Typography */
-  --color-text: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-  --color-danger: #ff4757;
+  /* Hairline Borders */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.05);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
 
-  /* Radii */
+  /* High-Legibility Typography */
+  --color-text: #f7f8fa;             /* Warm Pearl White */
+  --color-text-secondary: #9da5b4;   /* Soft Mineral */
+  --color-text-muted: #646d7e;       /* Muted Stone */
+  --color-text-inverse: #0c0e12;
+
+  /* Typography Stacks */
+  --font-serif: 'Playfair Display', Georgia, Cambria, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Refined Radii (Tailored, not oversized) */
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
   --radius-full: 9999px;
 
-  /* Fonts */
-  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+  /* Layered Natural Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+  --shadow-editorial: 0 20px 48px -8px rgba(0, 0, 0, 0.7);
 
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 25px var(--color-primary-glow);
-
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* Brand Gradients */
-  --gradient-brand: linear-gradient(135deg, #ff4757 0%, #ff6b81 50%, #ffa502 100%);
-  --gradient-overlay: linear-gradient(to top, rgba(9, 12, 16, 0.95) 0%, rgba(9, 12, 16, 0.5) 50%, transparent 100%);
-  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  /* Micro-Interactions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 140ms var(--ease-out);
+  --transition-smooth: 240ms var(--ease-out);
 }
 
-/* Light theme support */
-[data-theme="light"] {
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f1f5f9;
-  --color-surface-alt: #f1f5f9;
-  --color-surface-glass: rgba(255, 255, 255, 0.85);
-  --color-border: #e2e8f0;
-  --color-text: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  --color-primary: #ff4757;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
-  --gradient-overlay: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, transparent 100%);
-}
-
-/* Global Reset & Base */
+/* Global Reset */
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-stack);
+  font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
   overflow-x: hidden;
+}
+
+/* Editorial Typography Helpers */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0;
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+  letter-spacing: -0.015em;
 }
 
 a {
@@ -94,14 +101,20 @@ a {
 }
 
 button {
-  font-family: inherit;
+  font-family: var(--font-sans);
   cursor: pointer;
+  border: none;
+  background: none;
 }
 
-/* Custom scrollbar for modern aesthetic */
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -109,44 +122,102 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.28);
 }
 
-/* Common UI Pills & Badges */
-.badge-tag {
+/* Refined Pill Badges (Replaces tacky emojis) */
+.badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
-.badge-tag.tag-spicy {
-  background: rgba(255, 71, 87, 0.2);
-  border-color: rgba(255, 71, 87, 0.4);
-  color: #ff6b81;
+.badge-pill--primary {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary-border);
+  color: #ff7862;
 }
 
-.badge-tag.tag-veg {
-  background: rgba(46, 213, 115, 0.2);
-  border-color: rgba(46, 213, 115, 0.4);
-  color: #2ed573;
+.badge-pill--gold {
+  background: var(--color-accent-gold-subtle);
+  border-color: rgba(223, 158, 56, 0.35);
+  color: #eec170;
 }
 
-.badge-tag.tag-cuisine {
-  background: rgba(255, 165, 2, 0.2);
-  border-color: rgba(255, 165, 2, 0.4);
-  color: #ffa502;
+.badge-pill--green {
+  background: var(--color-accent-green-subtle);
+  border-color: rgba(72, 165, 116, 0.35);
+  color: #61cca4;
+}
+
+.badge-pill--price {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn-editorial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all var(--transition-smooth);
+}
+
+.btn-editorial--primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(226, 80, 55, 0.28);
+}
+
+.btn-editorial--primary:hover {
+  background: var(--color-primary-hover);
+  box-shadow: 0 4px 16px rgba(226, 80, 55, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-editorial--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-editorial--secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-editorial--gold {
+  background: var(--color-accent-gold);
+  color: #0c0e12;
+  font-weight: 700;
+}
+
+.btn-editorial--gold:hover {
+  background: #f0ab42;
+  transform: translateY(-1px);
 }

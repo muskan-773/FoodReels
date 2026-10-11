@@ -3,18 +3,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 60px;
-  background: rgba(9, 12, 16, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  height: 62px;
+  background: rgba(12, 14, 18, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   color: #fff;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
 
 .bottom-nav__inner {
-  max-width: 600px;
+  max-width: 540px;
   margin: 0 auto;
   height: 100%;
   display: grid;
@@ -30,53 +30,54 @@
   color: var(--color-text-muted);
   text-decoration: none;
   gap: 3px;
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  transition: all var(--transition-fast);
   padding: 6px 0;
 }
 
 .bottom-nav__item.is-active {
-  color: #ff4757;
-  font-weight: 700;
+  color: #fff;
 }
 
 .bottom-nav__item.is-active .bottom-nav__icon {
-  transform: scale(1.1);
-  filter: drop-shadow(0 2px 6px rgba(255, 71, 87, 0.4));
+  color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .bottom-nav__item:hover {
-  color: #fff;
+  color: var(--color-text);
 }
 
 .bottom-nav__icon {
   line-height: 0;
   transition: transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bottom-nav__icon--plus {
-  background: var(--gradient-brand);
+  background: var(--color-primary);
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  display: grid;
-  place-items: center;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+  box-shadow: 0 2px 10px rgba(226, 80, 55, 0.4);
 }
 
 .bottom-nav__label {
-  font-size: 11px;
-  letter-spacing: 0.2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-/* Hide bottom nav on large desktop screens where TopNav is primary */
+/* Hide bottom nav on desktop */
 @media (min-width: 900px) {
   .bottom-nav {
     display: none;
   }
 }
 
-/* Safe area for iOS devices */
+/* Safe area for mobile devices */
 @supports (padding: max(0px)) {
   .bottom-nav {
     padding-bottom: max(env(safe-area-inset-bottom), 0px);

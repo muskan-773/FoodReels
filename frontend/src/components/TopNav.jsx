@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Flame, Sparkles, Bookmark, Plus, Store, LogOut, User as UserIcon, UtensilsCrossed } from 'lucide-react';
 import '../styles/top-nav.css';
 
 const TopNav = () => {
@@ -13,62 +14,68 @@ const TopNav = () => {
     };
 
     const displayName = isPartner
-        ? foodPartner?.name || 'Restaurant'
-        : user?.fullName || 'User';
+        ? foodPartner?.name || 'Kitchen'
+        : user?.fullName || 'Foodie';
 
     const initials = displayName.charAt(0).toUpperCase();
 
     return (
         <header className="top-nav" role="banner">
             <div className="top-nav__container">
-                {/* Brand */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Link to="/" className="top-nav__brand">
-                        <span className="top-nav__logo-icon">🍔</span>
+                {/* Brand Monogram & Name */}
+                <Link to="/" className="top-nav__brand" title="FoodReels Home">
+                    <div className="top-nav__logo-mark" aria-hidden="true">
+                        <UtensilsCrossed size={17} strokeWidth={2.2} />
+                    </div>
+                    <div className="top-nav__brand-title">
                         <span className="top-nav__logo-text">FoodReels</span>
-                    </Link>
-                    <span className="top-nav__badge">AI Powered</span>
-                </div>
+                        <span className="top-nav__logo-sub">Curated Gastronomy</span>
+                    </div>
+                </Link>
 
-                {/* Desktop navigation links */}
+                {/* Primary Editorial Navigation */}
                 <nav className="top-nav__links" aria-label="Main navigation">
                     <NavLink to="/" end className={({ isActive }) => `top-nav__link ${isActive ? 'active' : ''}`}>
-                        <span>🔥 Feed</span>
+                        <Flame size={15} strokeWidth={2.2} />
+                        <span>The Feed</span>
                     </NavLink>
                     <NavLink to="/search" className={({ isActive }) => `top-nav__link top-nav__link--ai ${isActive ? 'active' : ''}`}>
-                        <span>✨ AI Cravings</span>
+                        <Sparkles size={15} strokeWidth={2.2} />
+                        <span>AI Sommelier</span>
                     </NavLink>
                     <NavLink to="/saved" className={({ isActive }) => `top-nav__link ${isActive ? 'active' : ''}`}>
-                        <span>🔖 Saved</span>
+                        <Bookmark size={15} strokeWidth={2.2} />
+                        <span>Saved Dishes</span>
                     </NavLink>
                 </nav>
 
-                {/* Right side actions */}
+                {/* Right Side Controls */}
                 <div className="top-nav__actions">
                     {isPartner && (
                         <Link to="/create-food" className="top-nav__btn-upload">
-                            <span>➕</span>
-                            <span>Upload Reel</span>
+                            <Plus size={15} strokeWidth={2.5} />
+                            <span>Publish Reel</span>
                         </Link>
                     )}
 
                     {isLoggedIn ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Link to="/profile" className="top-nav__avatar-btn" title="View Profile">
-                                <div className="top-nav__avatar-circle">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Link to="/profile" className="top-nav__user-pill" title="View Account">
+                                <div className="top-nav__avatar">
                                     {initials}
                                 </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'none', md: 'inline' }}>
+                                <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {displayName.split(' ')[0]}
                                 </span>
                             </Link>
                             <button
                                 onClick={handleLogout}
                                 className="top-nav__btn-signin"
-                                style={{ padding: '5px 10px', fontSize: '0.78rem' }}
+                                style={{ padding: '7px 10px', color: 'var(--color-text-muted)' }}
                                 title="Sign out"
+                                aria-label="Log out"
                             >
-                                Logout
+                                <LogOut size={15} />
                             </button>
                         </div>
                     ) : (
@@ -76,8 +83,9 @@ const TopNav = () => {
                             <Link to="/user/login" className="top-nav__btn-signin">
                                 Sign In
                             </Link>
-                            <Link to="/food-partner/login" className="top-nav__btn-signin" style={{ display: 'none', sm: 'inline-flex' }}>
-                                Partners
+                            <Link to="/food-partner/login" className="top-nav__btn-partner" title="Restaurant & Partner Portal">
+                                <Store size={14} />
+                                <span>Kitchen Portal</span>
                             </Link>
                         </div>
                     )}

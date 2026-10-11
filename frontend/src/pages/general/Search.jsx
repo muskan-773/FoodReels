@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sparkles, Compass, ArrowRight, Check, Play, UtensilsCrossed, Wine } from 'lucide-react';
 import SearchBar from '../../components/SearchBar';
 import EmptyState from '../../components/EmptyState';
 import VideoCard from '../../components/VideoCard';
@@ -7,15 +8,15 @@ import Toast from '../../components/Toast';
 import { foodApi } from '../../services/api';
 import '../../styles/search.css';
 
-const CUISINE_OPTIONS = ['All', 'Italian', 'Indian', 'Japanese', 'Mexican', 'Bakery & Desserts', 'Healthy & Clean'];
+const CUISINE_OPTIONS = ['All', 'Italian', 'Indian', 'Japanese', 'Mexican', 'Bakery & Desserts', 'Healthy & Clean', 'Street Food'];
 const DIETARY_OPTIONS = ['Vegetarian', 'Vegan', 'Spicy', 'Gluten-Free', 'High-Protein', 'Dessert'];
 
-const QUICK_PROMPTS = [
-    { label: "🌶️ Spicy Street Food", query: "spicy sizzling street food with bold spices" },
-    { label: "🧀 Cheesy Comfort Food", query: "rich molten melted cheese pasta or pizza" },
-    { label: "🍜 Hot Steaming Soup", query: "warm soothing noodle ramen broth on a cold evening" },
-    { label: "🥗 Healthy High-Protein", query: "clean fresh organic salad bowl with protein" },
-    { label: "🍰 Decadent Dessert", query: "warm rich chocolate dessert or freshly baked sweet" }
+const CURATED_MOODS = [
+    { label: "Slow-Braised Comfort", query: "warm rich slow-simmered comfort dish with melted cheese or rich broth" },
+    { label: "Smoky Street Flare", query: "fiery spicy street food with bold spices and charred texture" },
+    { label: "Clean & Herbaceous", query: "clean fresh organic vegetable bowl with light herbs and protein" },
+    { label: "Decadent Sweet Tooth", query: "warm artisanal chocolate dessert or freshly baked pastry" },
+    { label: "Sizzling Claypot & Naan", query: "aromatic Indian curry with freshly baked garlic naan" }
 ];
 
 const Search = () => {
@@ -65,11 +66,11 @@ const Search = () => {
 
             setAiResults(res.data);
             if (!res.data.recommendations || res.data.recommendations.length === 0) {
-                showToast("No exact matches found. Try broadening your craving description.", "info");
+                showToast("No exact pairing found. Try broadening your craving description.", "info");
             }
         } catch (err) {
             console.error("AI recommendation error:", err);
-            showToast("Failed to generate AI recommendations. Please try again.", "error");
+            showToast("Failed to generate recommendations. Please try again.", "error");
         } finally {
             setAiLoading(false);
         }
@@ -104,9 +105,9 @@ const Search = () => {
             <header className="search-header">
                 <div className="search-title-row">
                     <div>
-                        <h1 className="search-title">Discover Food</h1>
-                        <p style={{ color: 'var(--color-text-secondary)', margin: '4px 0 0', fontSize: '0.9rem' }}>
-                            Find your next meal with AI culinary intelligence or browse the catalog.
+                        <h1 className="search-title">Culinary Discovery</h1>
+                        <p className="search-subtitle">
+                            Search by flavor profile, dietary lifestyle, or natural cravings. Powered by our Gemini AI Sommelier.
                         </p>
                     </div>
 
@@ -118,7 +119,8 @@ const Search = () => {
                             role="tab"
                             aria-selected={activeTab === 'ai'}
                         >
-                            <span>✨ AI Sommelier</span>
+                            <Sparkles size={14} />
+                            <span>AI Sommelier</span>
                         </button>
                         <button
                             className={`search-tab-btn ${activeTab === 'catalog' ? 'is-active' : ''}`}
@@ -126,7 +128,8 @@ const Search = () => {
                             role="tab"
                             aria-selected={activeTab === 'catalog'}
                         >
-                            <span>🔍 Browse All</span>
+                            <Compass size={14} />
+                            <span>Explore Catalog</span>
                         </button>
                     </div>
                 </div>
@@ -134,45 +137,50 @@ const Search = () => {
 
             {/* TAB 1: AI FOOD SOMMELIER */}
             {activeTab === 'ai' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     <div className="ai-sommelier-card">
                         <div className="ai-card-header">
                             <h2 className="ai-card-title">
-                                <span>✨</span> What are you craving today?
+                                <span>The Tasting Concierge</span>
                             </h2>
-                            <span className="ai-model-tag">Gemini Powered</span>
+                            <span className="ai-model-tag">Gemini Intelligence</span>
                         </div>
 
                         <div className="ai-input-wrap">
                             <textarea
                                 className="ai-textarea"
                                 rows={3}
-                                placeholder="Describe what you want to eat in plain words (e.g., 'Something spicy and crispy for dinner', 'Comforting Italian pasta with creamy sauce', 'Light high-protein salad')..."
+                                placeholder="Describe your exact mood, texture, or craving (e.g. 'Looking for a warm slow-simmered noodle broth on a cold evening', or 'crispy spicy tacos with melted cheese')..."
                                 value={aiQuery}
                                 onChange={(e) => setAiQuery(e.target.value)}
                             />
 
-                            {/* Quick craving presets */}
-                            <div className="quick-prompts-row">
-                                {QUICK_PROMPTS.map((p) => (
-                                    <button
-                                        key={p.label}
-                                        type="button"
-                                        className="quick-prompt-btn"
-                                        onClick={() => {
-                                            setAiQuery(p.query);
-                                            handleAskAi(p.query);
-                                        }}
-                                    >
-                                        {p.label}
-                                    </button>
-                                ))}
+                            {/* Curated Mood Prompts */}
+                            <div>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', display: 'block', marginBottom: '8px' }}>
+                                    Curated Flavor Profiles
+                                </span>
+                                <div className="quick-prompts-row">
+                                    {CURATED_MOODS.map((m) => (
+                                        <button
+                                            key={m.label}
+                                            type="button"
+                                            className="quick-prompt-btn"
+                                            onClick={() => {
+                                                setAiQuery(m.query);
+                                                handleAskAi(m.query);
+                                            }}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
-                            {/* Dietary preferences pills */}
-                            <div style={{ marginTop: '4px' }}>
-                                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px' }}>
-                                    Dietary Preferences (Optional):
+                            {/* Dietary Preferences */}
+                            <div>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', display: 'block', marginBottom: '8px' }}>
+                                    Dietary Preferences
                                 </span>
                                 <div className="dietary-tags-row">
                                     {DIETARY_OPTIONS.map(diet => (
@@ -191,35 +199,32 @@ const Search = () => {
 
                         <div className="ai-action-row">
                             <button
-                                className="ai-submit-btn"
+                                className="btn-editorial btn-editorial--primary"
                                 onClick={() => handleAskAi()}
                                 disabled={aiLoading || (!aiQuery.trim() && selectedDiets.length === 0)}
                             >
-                                {aiLoading ? (
-                                    <>
-                                        <span style={{ display: 'inline-block', animation: 'search-shimmer 1s infinite' }}>⏳</span>
-                                        Matching Cravings…
-                                    </>
-                                ) : (
-                                    <>✨ Find Matching Reels</>
-                                )}
+                                <Sparkles size={16} />
+                                <span>{aiLoading ? "Curating Pairings…" : "Match My Craving"}</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* AI Recommendations Output */}
+                    {/* AI Recommendation Output */}
                     {aiResults && (
                         <div className="ai-results-section">
                             <div className="ai-summary-banner">
-                                <strong>💡 AI Sommelier:</strong> {aiResults.summary}
+                                <strong style={{ color: 'var(--color-accent-gold)', display: 'block', marginBottom: '2px', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    Sommelier Tasting Notes
+                                </strong>
+                                {aiResults.summary}
                             </div>
 
                             {aiResults.recommendations.length === 0 ? (
                                 <EmptyState
-                                    icon="🍽️"
-                                    title="No matching dishes found"
-                                    message="Try adjusting your craving description or removing dietary filters."
-                                    action={{ label: "Reset Cravings", onClick: () => { setAiQuery(''); setSelectedDiets([]); } }}
+                                    icon={<UtensilsCrossed size={22} />}
+                                    title="No Exact Pairings Found"
+                                    message="Try broadening your craving description or adjusting selected dietary filters."
+                                    action={{ label: "Reset Search", onClick: () => { setAiQuery(''); setSelectedDiets([]); } }}
                                 />
                             ) : (
                                 <div className="ai-cards-grid">
@@ -228,6 +233,7 @@ const Search = () => {
                                             <div
                                                 className="ai-dish-video-wrap"
                                                 onClick={() => navigate(`/?highlight=${dish._id}`)}
+                                                title={`Watch ${dish.name} in feed`}
                                             >
                                                 <video
                                                     className="ai-dish-video"
@@ -237,25 +243,26 @@ const Search = () => {
                                                     preload="metadata"
                                                 />
                                                 <div className="ai-dish-match-badge">
-                                                    ★ {dish.matchScore || 90}% Match
+                                                    {dish.matchScore || 92}% Match
                                                 </div>
                                             </div>
 
                                             <div className="ai-dish-body">
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                                                     <h3 className="ai-dish-title">{dish.name}</h3>
                                                     {dish.cuisine && (
-                                                        <span className="badge-tag tag-cuisine">{dish.cuisine}</span>
+                                                        <span className="badge-pill badge-pill--gold">{dish.cuisine}</span>
                                                     )}
                                                 </div>
 
                                                 <p className="ai-dish-reason">
-                                                    ✨ <em>{dish.recommendationReason || dish.description}</em>
+                                                    {dish.recommendationReason || dish.description}
                                                 </p>
 
                                                 {dish.suggestedPairing && (
                                                     <div className="ai-dish-pairing">
-                                                        🍷 Pairing: {dish.suggestedPairing}
+                                                        <Wine size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                                                        Pairing: {dish.suggestedPairing}
                                                     </div>
                                                 )}
 
@@ -263,7 +270,8 @@ const Search = () => {
                                                     className="ai-dish-cta"
                                                     onClick={() => navigate(`/?highlight=${dish._id}`)}
                                                 >
-                                                    ▶ Watch Reel →
+                                                    <span>View Reel</span>
+                                                    <ArrowRight size={14} />
                                                 </button>
                                             </div>
                                         </div>
@@ -277,14 +285,14 @@ const Search = () => {
 
             {/* TAB 2: EXPLORE CATALOG */}
             {activeTab === 'catalog' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <SearchBar
                         value={catalogSearch}
                         onChange={setCatalogSearch}
-                        placeholder="Search by dish, ingredient, or restaurant…"
+                        placeholder="Search dishes, ingredients, or restaurant kitchens…"
                     />
 
-                    {/* Cuisine Filter Pills */}
+                    {/* Cuisine Chips */}
                     <div className="cuisine-chips-row" role="radiogroup" aria-label="Cuisine filter">
                         {CUISINE_OPTIONS.map(c => (
                             <button
@@ -307,9 +315,9 @@ const Search = () => {
                         </div>
                     ) : filteredCatalog.length === 0 ? (
                         <EmptyState
-                            icon="🔍"
-                            title={catalogSearch ? `No results for "${catalogSearch}"` : "No food reels found"}
-                            message={catalogSearch ? "Try checking spelling or choosing a different cuisine." : "No dishes found in this category."}
+                            icon={<Compass size={22} />}
+                            title={catalogSearch ? `No dishes found for "${catalogSearch}"` : "No food reels in this category"}
+                            message={catalogSearch ? "Try checking spelling or exploring all cuisines." : "New kitchen reels are added regularly."}
                             action={catalogSearch || selectedCuisine !== 'All' ? { label: "Reset filters", onClick: () => { setCatalogSearch(''); setSelectedCuisine('All'); } } : null}
                         />
                     ) : (
@@ -319,6 +327,8 @@ const Search = () => {
                                     key={v._id}
                                     video={v.video}
                                     name={v.name}
+                                    cuisine={v.cuisine}
+                                    price={v.price}
                                     likeCount={v.likeCount ?? 0}
                                     savesCount={v.savesCount ?? 0}
                                     onClick={() => navigate(`/?highlight=${v._id}`)}

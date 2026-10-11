@@ -1,24 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Bookmark, Flame, Sparkles, Plus, Store, LogOut, Play, MapPin, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { foodApi } from '../../services/api';
 import '../../styles/user-profile.css';
 
 function getInitials(name = '') {
     return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
-}
-
-const GRAD = [
-    'linear-gradient(135deg, #ff416c, #ff4b2b)',
-    'linear-gradient(135deg, #f59e0b, #ea580c)',
-    'linear-gradient(135deg, #10b981, #059669)',
-    'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-];
-
-function getGrad(name = '') {
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-    return GRAD[Math.abs(h) % GRAD.length];
 }
 
 const UserProfile = () => {
@@ -71,26 +59,29 @@ const UserProfile = () => {
     // Guest prompt if not logged in
     if (!isLoggedIn) {
         return (
-            <div className="up-page" style={{ paddingTop: '80px', textAlign: 'center' }}>
+            <div className="up-page" style={{ textAlign: 'center' }}>
                 <div style={{
-                    maxWidth: '480px',
+                    maxWidth: '460px',
                     margin: '40px auto',
-                    padding: '32px 24px',
+                    padding: '40px 28px',
                     background: 'var(--color-surface)',
-                    borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--color-border)'
+                    borderRadius: 'var(--radius-xl)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: 'var(--shadow-md)'
                 }}>
-                    <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>👋</span>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome to FoodReels</h1>
-                    <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 24px', fontSize: '0.92rem' }}>
-                        Sign in to like, save your favorite food reels, and get personalized AI recommendations.
+                    <h1 className="font-editorial" style={{ fontSize: '1.8rem', fontWeight: 600, margin: '0 0 8px', color: '#fff' }}>
+                        Welcome to FoodReels
+                    </h1>
+                    <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 28px', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                        Sign in to save your favorite dishes, customize dietary cravings, and discover culinary reels.
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <Link to="/user/login" className="up-empty-cta" style={{ display: 'block', textAlign: 'center' }}>
+                        <Link to="/user/login" className="btn-editorial btn-editorial--primary" style={{ width: '100%' }}>
                             Sign In as Foodie
                         </Link>
-                        <Link to="/food-partner/login" className="up-link-card" style={{ justifyContent: 'center' }}>
-                            <span>🍴 Food Partner Login</span>
+                        <Link to="/food-partner/login" className="btn-editorial btn-editorial--secondary" style={{ width: '100%' }}>
+                            <Store size={15} />
+                            <span>Restaurant Partner Portal</span>
                         </Link>
                     </div>
                 </div>
@@ -100,38 +91,36 @@ const UserProfile = () => {
 
     const accountName = isPartner ? foodPartner.name : user.fullName;
     const accountEmail = isPartner ? foodPartner.email : user.email;
-    const grad = getGrad(accountName);
     const initials = getInitials(accountName);
 
     return (
-        <div className="up-page" style={{ paddingTop: '76px' }}>
+        <div className="up-page">
 
             {/* ── Header ── */}
             <div className="up-header">
-                <div className="up-avatar" style={{ background: grad }}>
+                <div className="up-avatar">
                     {initials}
                 </div>
                 <div className="up-info">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         <h1 className="up-name">{accountName}</h1>
-                        {isPartner && (
-                            <span className="badge-tag tag-cuisine">🍴 Restaurant Partner</span>
+                        {isPartner ? (
+                            <span className="badge-pill badge-pill--gold">Partner Kitchen</span>
+                        ) : (
+                            <span className="badge-pill">Foodie Member</span>
                         )}
                     </div>
                     <p className="up-email">{accountEmail}</p>
                     {isPartner && foodPartner.address && (
-                        <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                            📍 {foodPartner.address}
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <MapPin size={12} />
+                            <span>{foodPartner.address}</span>
                         </p>
                     )}
                 </div>
                 <button className="up-logout-btn" onClick={handleLogout} aria-label="Log out">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
-                    Log out
+                    <LogOut size={14} />
+                    <span>Log out</span>
                 </button>
             </div>
 
@@ -141,7 +130,7 @@ const UserProfile = () => {
                     <>
                         <div className="up-stat">
                             <span className="up-stat-value">{partnerVideos.length}</span>
-                            <span className="up-stat-label">Uploaded Reels</span>
+                            <span className="up-stat-label">Published Reels</span>
                         </div>
                         <div className="up-stat">
                             <span className="up-stat-value">
@@ -151,46 +140,54 @@ const UserProfile = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="up-stat">
-                        <span className="up-stat-value">{savedVideos.length}</span>
-                        <span className="up-stat-label">Saved Reels</span>
-                    </div>
+                    <>
+                        <div className="up-stat">
+                            <span className="up-stat-value">{savedVideos.length}</span>
+                            <span className="up-stat-label">Saved Dishes</span>
+                        </div>
+                        <div className="up-stat">
+                            <span className="up-stat-value">Active</span>
+                            <span className="up-stat-label">Taste Profile</span>
+                        </div>
+                    </>
                 )}
             </div>
 
-            {/* ── Quick links ── */}
+            {/* ── Quick Links ── */}
             <div className="up-links">
                 {isPartner && (
-                    <Link to="/create-food" className="up-link-card" style={{ border: '1px solid #ff4757' }}>
-                        <span className="up-link-icon">➕</span>
-                        <span style={{ fontWeight: 700, color: '#ff4757' }}>Upload New Food Reel</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
+                    <Link to="/create-food" className="up-link-card" style={{ border: '1px solid var(--color-primary-border)' }}>
+                        <span className="up-link-icon" style={{ color: 'var(--color-primary)' }}><Plus size={18} /></span>
+                        <span style={{ fontWeight: 700, color: '#ff7862' }}>Publish New Reel</span>
                     </Link>
                 )}
                 <Link to="/" className="up-link-card">
-                    <span className="up-link-icon">🔥</span>
-                    <span>Home Reels Feed</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
+                    <span className="up-link-icon"><Flame size={18} /></span>
+                    <span>The Food Feed</span>
                 </Link>
                 <Link to="/search" className="up-link-card">
-                    <span className="up-link-icon">✨</span>
+                    <span className="up-link-icon"><Sparkles size={18} /></span>
                     <span>AI Craving Sommelier</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
                 </Link>
             </div>
 
             {/* ── Content Grid (Partner Uploads or User Saves) ── */}
             <section className="up-saved-section">
                 <h2 className="up-section-title">
-                    {isPartner ? "Your Uploaded Reels" : "Saved Reels"}
+                    {isPartner ? "Your Published Menu Reels" : "Saved Culinary Collection"}
                 </h2>
 
                 {(isPartner ? partnerVideos : savedVideos).length === 0 ? (
                     <div className="up-empty">
-                        <span>{isPartner ? "📹" : "🔖"}</span>
-                        <p>{isPartner ? "You haven't uploaded any reels yet." : "Nothing saved yet."}</p>
-                        <Link to={isPartner ? "/create-food" : "/"} className="up-empty-cta">
-                            {isPartner ? "Create your first reel" : "Browse reels"}
+                        <Bookmark size={28} color="var(--color-text-muted)" />
+                        <h3 className="font-editorial" style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>
+                            {isPartner ? "No Reels Published Yet" : "Your Collection is Empty"}
+                        </h3>
+                        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.88rem', margin: 0 }}>
+                            {isPartner ? "Upload your first dish reel to start attracting diners." : "Tap the bookmark icon on any dish reel in the feed to save it here."}
+                        </p>
+                        <Link to={isPartner ? "/create-food" : "/"} className="btn-editorial btn-editorial--primary" style={{ marginTop: '8px' }}>
+                            {isPartner ? "Publish First Reel" : "Browse The Feed"}
                         </Link>
                     </div>
                 ) : (
@@ -204,11 +201,13 @@ const UserProfile = () => {
                             >
                                 <video src={v.video} muted playsInline preload="metadata" className="up-grid-video" />
                                 <div className="up-grid-overlay">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                    <Play size={24} fill="white" strokeWidth={0} />
                                 </div>
                                 <div className="up-grid-meta">
                                     <span className="up-grid-name">{v.name}</span>
-                                    <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>❤️ {v.likeCount || 0}</span>
+                                    <span style={{ fontSize: '0.72rem', opacity: 0.85, fontVariantNumeric: 'tabular-nums' }}>
+                                        ❤️ {v.likeCount || 0}
+                                    </span>
                                 </div>
                             </button>
                         ))}
@@ -220,14 +219,20 @@ const UserProfile = () => {
             {activeVideo && (
                 <div className="up-lightbox" onClick={() => setActiveVideo(null)} role="dialog" aria-modal="true">
                     <div className="up-lightbox-inner" onClick={e => e.stopPropagation()}>
-                        <button className="up-lightbox-close" onClick={() => setActiveVideo(null)}>✕</button>
+                        <button className="up-lightbox-close" onClick={() => setActiveVideo(null)} aria-label="Close modal">
+                            <X size={16} />
+                        </button>
                         <video src={activeVideo.video} controls autoPlay playsInline className="up-lightbox-video" />
                         <div className="up-lightbox-info">
-                            <h3>{activeVideo.name}</h3>
-                            {activeVideo.description && <p>{activeVideo.description}</p>}
-                            <div style={{ marginTop: '10px' }}>
+                            <h3 className="font-editorial" style={{ fontSize: '1.3rem', margin: 0 }}>{activeVideo.name}</h3>
+                            {activeVideo.description && (
+                                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.88rem', margin: 0, lineHeight: 1.5 }}>
+                                    {activeVideo.description}
+                                </p>
+                            )}
+                            <div style={{ marginTop: '8px' }}>
                                 <button
-                                    className="up-empty-cta"
+                                    className="btn-editorial btn-editorial--primary"
                                     onClick={() => navigate(`/?highlight=${activeVideo._id}`)}
                                 >
                                     Open in Feed →
