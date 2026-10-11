@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import '../../styles/reels.css';
-import axios from 'axios';
 import ReelFeed from '../../components/ReelFeed';
 import Skeleton from '../../components/Skeleton';
 import Toast from '../../components/Toast';
-
-const api = axios.create({
-    baseURL: "http://localhost:3001",
-    withCredentials: true,
-});
+import { foodApi } from '../../services/api';
 
 const Saved = () => {
     const [videos, setVideos] = useState([]);
@@ -18,22 +13,29 @@ const Saved = () => {
     const showToast = (message, type = 'info') => setToast({ message, type });
 
     useEffect(() => {
-        api.get("/api/food/save")
+        foodApi.getSaved()
             .then(response => {
-                const savedFoods = (response.data.savedFoods || []).map((item) => ({
-                    _id: item.food._id,
-                    video: item.food.video,
-                    name: item.food.name,
-                    description: item.food.description,
-                    likeCount: item.food.likeCount ?? 0,
-                    savesCount: item.food.savesCount ?? 0,
-                    commentsCount: item.food.commentsCount ?? 0,
-                    foodPartner: item.food.foodPartner,
-                }));
-                setVideos(savedFoods);
+                const rawItems = response.data.savedFoods || [];
+                // Filter out any entries where the referenced food was deleted
+                const cleanFoods = rawItems
+                    .filter(item => item && (item.video || item.name))
+                    .map(item => ({
+                        _id: item._id,
+                        video: item.video,
+                        name: item.name,
+                        description: item.description,
+                        cuisine: item.cuisine || 'General',
+                        dietaryTags: item.dietaryTags || [],
+                        likeCount: item.likeCount ?? 0,
+                        savesCount: item.savesCount ?? 0,
+                        commentsCount: item.commentsCount ?? 0,
+                        foodPartner: item.foodPartner,
+                        isSaved: true
+                    }));
+                setVideos(cleanFoods);
             })
             .catch(err => {
-                const msg = err.response?.data?.message || "Failed to load saved videos.";
+                const msg = err.response?.data?.message || "Please log in to view your saved reels.";
                 showToast(msg, "error");
             })
             .finally(() => setLoading(false));
@@ -41,11 +43,11 @@ const Saved = () => {
 
     const removeSaved = async (item) => {
         try {
-            await api.post("/api/food/save", { foodId: item._id });
+            await foodApi.save(item._id);
             setVideos(prev => prev.filter(v => v._id !== item._id));
-            showToast("Removed from saved.", "success");
+            showToast("Removed from saved reels.", "success");
         } catch (err) {
-            const msg = err.response?.data?.message || "Could not remove saved video.";
+            const msg = err.response?.data?.message || "Could not remove saved reel.";
             showToast(msg, "error");
         }
     };
@@ -57,7 +59,7 @@ const Saved = () => {
             <ReelFeed
                 items={videos}
                 onSave={removeSaved}
-                emptyMessage="Nothing saved yet. Tap the bookmark on any video!"
+                emptyMessage="No saved reels yet. Tap the bookmark icon on any delicious reel to save it!"
             />
             {toast && (
                 <Toast

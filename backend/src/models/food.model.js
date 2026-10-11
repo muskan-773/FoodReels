@@ -4,19 +4,36 @@ const foodSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
   },
   video: {
     type: String,
     required: true,
+    trim: true,
   },
   description: {
     type: String,
     default: '',
+    trim: true,
+  },
+  cuisine: {
+    type: String,
+    default: 'General',
+    trim: true,
+  },
+  dietaryTags: {
+    type: [String],
+    default: [],
+  },
+  price: {
+    type: Number,
+    default: 0,
+    min: 0,
   },
   foodPartner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "foodpartner",
-    required: true
+    ref: 'foodpartner',
+    required: true,
   },
   likeCount: {
     type: Number,
@@ -35,5 +52,8 @@ const foodSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-const foodModel = mongoose.model("food", foodSchema);
+// Text search index for fast text searches
+foodSchema.index({ name: 'text', description: 'text', cuisine: 'text' });
+
+const foodModel = mongoose.model('food', foodSchema);
 module.exports = foodModel;

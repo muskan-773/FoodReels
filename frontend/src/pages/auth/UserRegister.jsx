@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/auth-shared.css';
-import axios from 'axios';
+import { authApi } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const UserRegister = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -24,13 +26,20 @@ const UserRegister = () => {
             return;
         }
 
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long.");
+            setLoading(false);
+            return;
+        }
+
         try {
-            await axios.post("http://localhost:3001/api/auth/user/register", {
+            const res = await authApi.registerUser({
                 fullName: `${firstName} ${lastName}`.trim(),
                 email,
                 password
-            }, { withCredentials: true });
+            });
 
+            login(res.data.token, res.data.user, 'user');
             navigate("/");
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed. Please try again.");
@@ -43,14 +52,15 @@ const UserRegister = () => {
         <div className="auth-page-wrapper">
             <div className="auth-card" role="region" aria-labelledby="user-register-title">
                 <header>
-                    <h1 id="user-register-title" className="auth-title">Create your account</h1>
-                    <p className="auth-subtitle">Join to explore and enjoy delicious meals.</p>
+                    <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🍔</div>
+                    <h1 id="user-register-title" className="auth-title">Create your foodie account</h1>
+                    <p className="auth-subtitle">Join to discover, rate, and save delicious meals near you.</p>
                 </header>
 
                 <nav className="auth-alt-action" style={{ marginTop: '-4px' }}>
-                    <strong style={{ fontWeight: 600 }}>Switch:</strong>{' '}
-                    <Link to="/user/register">User</Link> •{' '}
-                    <Link to="/food-partner/register">Food partner</Link>
+                    <strong style={{ fontWeight: 600 }}>Switch Role:</strong>{' '}
+                    <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>Foodie User</span> •{' '}
+                    <Link to="/food-partner/register">Restaurant Partner</Link>
                 </nav>
 
                 {error && (
@@ -69,11 +79,11 @@ const UserRegister = () => {
                         </div>
                     </div>
                     <div className="field-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">Email Address</label>
                         <input id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required />
                     </div>
                     <div className="field-group">
-                        <label htmlFor="password">Password</label>
+                        <label htmlFor="password">Password (min 6 chars)</label>
                         <input id="password" name="password" type="password" placeholder="••••••••" autoComplete="new-password" required minLength={6} />
                     </div>
                     <button className="auth-submit" type="submit" disabled={loading}>

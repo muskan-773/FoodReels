@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import '../../styles/auth-shared.css';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { authApi } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const FoodPartnerLogin = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -16,15 +18,18 @@ const FoodPartnerLogin = () => {
         const email = e.target.email.value.trim();
         const password = e.target.password.value;
 
-        try {
-            await axios.post("http://localhost:3001/api/auth/food-partner/login", {
-                email,
-                password
-            }, { withCredentials: true });
+        if (!email || !password) {
+            setError("Email and password are required.");
+            setLoading(false);
+            return;
+        }
 
+        try {
+            const res = await authApi.loginPartner({ email, password });
+            login(res.data.token, res.data.foodPartner, 'foodPartner');
             navigate("/create-food");
         } catch (err) {
-            setError(err.response?.data?.message || "Login failed. Please try again.");
+            setError(err.response?.data?.message || "Partner login failed. Please verify credentials.");
         } finally {
             setLoading(false);
         }
@@ -34,8 +39,9 @@ const FoodPartnerLogin = () => {
         <div className="auth-page-wrapper">
             <div className="auth-card" role="region" aria-labelledby="partner-login-title">
                 <header>
-                    <h1 id="partner-login-title" className="auth-title">Partner login</h1>
-                    <p className="auth-subtitle">Access your dashboard and manage your food reels.</p>
+                    <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🍴</div>
+                    <h1 id="partner-login-title" className="auth-title">Partner Kitchen Portal</h1>
+                    <p className="auth-subtitle">Access your restaurant dashboard and upload food reels.</p>
                 </header>
 
                 {error && (
@@ -44,12 +50,12 @@ const FoodPartnerLogin = () => {
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                     <div className="field-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">Business Email</label>
                         <input
                             id="email"
                             name="email"
                             type="email"
-                            placeholder="business@example.com"
+                            placeholder="business@restaurant.com"
                             autoComplete="email"
                             required
                         />
@@ -66,15 +72,15 @@ const FoodPartnerLogin = () => {
                         />
                     </div>
                     <button className="auth-submit" type="submit" disabled={loading}>
-                        {loading ? "Signing in…" : "Sign In"}
+                        {loading ? "Signing in…" : "Sign In to Partner Portal"}
                     </button>
                 </form>
 
                 <div className="auth-alt-action">
-                    New partner? <Link to="/food-partner/register">Create an account</Link>
+                    New restaurant partner? <Link to="/food-partner/register">Register your kitchen</Link>
                 </div>
                 <div className="auth-alt-action">
-                    A regular user? <Link to="/user/login">User login</Link>
+                    Are you a regular user? <Link to="/user/login">Foodie User Login →</Link>
                 </div>
             </div>
         </div>

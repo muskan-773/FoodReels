@@ -1,66 +1,152 @@
-/* CSS Theme Variables (Light & Dark via system preference) */
+/* ==============================================================================
+   FoodReels Design System - Gourmet Human-Crafted Theme
+   ============================================================================== */
 :root {
-  --color-bg: #f9fafb;
+  /* Brand Palettes */
+  --color-primary: #ff4757;
+  --color-primary-hover: #e84118;
+  --color-primary-glow: rgba(255, 71, 87, 0.35);
+  
+  --color-accent-gold: #ffa502;
+  --color-accent-green: #2ed573;
+  --color-accent-purple: #a55eea;
+
+  /* Surfaces & Dark Mode Default (Gourmet Cinematic Experience) */
+  --color-bg: #090c10;
+  --color-surface: #121721;
+  --color-surface-hover: #1a2232;
+  --color-surface-alt: #161c28;
+  --color-surface-glass: rgba(18, 23, 33, 0.75);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-glow: rgba(255, 71, 87, 0.25);
+
+  /* Typography */
+  --color-text: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-danger: #ff4757;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  /* Fonts */
+  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 25px var(--color-primary-glow);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Brand Gradients */
+  --gradient-brand: linear-gradient(135deg, #ff4757 0%, #ff6b81 50%, #ffa502 100%);
+  --gradient-overlay: linear-gradient(to top, rgba(9, 12, 16, 0.95) 0%, rgba(9, 12, 16, 0.5) 50%, transparent 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+}
+
+/* Light theme support */
+[data-theme="light"] {
+  --color-bg: #f8fafc;
   --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
   --color-surface-alt: #f1f5f9;
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
   --color-border: #e2e8f0;
   --color-text: #0f172a;
   --color-text-secondary: #475569;
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
-  --color-danger: #dc2626;
-
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-
-  --font-stack: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
-  --shadow-md: 0 4px 12px -2px rgba(0,0,0,.08),0 2px 4px -2px rgba(0,0,0,.06);
-
-  --transition-base: 120ms cubic-bezier(.4,0,.2,1);
+  --color-text-muted: #94a3b8;
+  --color-primary: #ff4757;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --gradient-overlay: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, transparent 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0f172a; /* slate-900 */
-    --color-surface: #1e293b; /* slate-800 */
-    --color-surface-alt: #24324a; /* custom */
-    --color-border: #334155; /* slate-700 */
-    --color-text: #f1f5f9; /* slate-100 */
-    --color-text-secondary: #94a3b8; /* slate-400 */
-    --color-accent: #3b82f6; /* blue-500 */
-    --color-accent-hover: #60a5fa; /* blue-400 */
-    --color-danger: #f87171; /* red-400 */
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
-    --shadow-md: 0 4px 18px -4px rgba(0,0,0,.5),0 2px 6px -2px rgba(0,0,0,.4);
-  }
+/* Global Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Base element theming (can be imported once globally) */
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-stack);
-  background: var(--color-bg);
+  background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.4;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
 a {
-  color: var(--color-accent);
+  color: inherit;
   text-decoration: none;
-  transition: color var(--transition-base);
+  transition: color var(--transition-fast);
 }
 
-a:hover, a:focus-visible { color: var(--color-accent-hover); }
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
 
-::selection { background: var(--color-accent); color: #fff; }
+/* Custom scrollbar for modern aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Common UI Pills & Badges */
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+.badge-tag.tag-spicy {
+  background: rgba(255, 71, 87, 0.2);
+  border-color: rgba(255, 71, 87, 0.4);
+  color: #ff6b81;
+}
+
+.badge-tag.tag-veg {
+  background: rgba(46, 213, 115, 0.2);
+  border-color: rgba(46, 213, 115, 0.4);
+  color: #2ed573;
+}
+
+.badge-tag.tag-cuisine {
+  background: rgba(255, 165, 2, 0.2);
+  border-color: rgba(255, 165, 2, 0.4);
+  color: #ffa502;
+}

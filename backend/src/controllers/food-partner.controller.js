@@ -1,28 +1,33 @@
 const foodPartnerModel = require('../models/foodpartner.model');
 const foodModel = require('../models/food.model');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 
 async function getFoodPartnerById(req, res) {
     try {
         const foodPartnerId = req.params.id;
-        const foodPartner = await foodPartnerModel.findById(foodPartnerId);
-        const foodItemsByFoodPartner = await foodModel.find({ foodPartner: foodPartnerId });
 
+        if (!mongoose.Types.ObjectId.isValid(foodPartnerId)) {
+            return res.status(404).json({ message: "Invalid food partner ID" });
+        }
+
+        const foodPartner = await foodPartnerModel.findById(foodPartnerId).select('-password');
         if (!foodPartner) {
             return res.status(404).json({ message: "Food partner not found" });
         }
+
+        const foodItemsByFoodPartner = await foodModel.find({ foodPartner: foodPartnerId }).sort({ createdAt: -1 });
 
         res.status(200).json({
             message: "Food partner retrieved successfully",
             foodPartner: {
                 ...foodPartner.toObject(),
-                password: undefined, // never expose password
                 foodItems: foodItemsByFoodPartner
             }
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
+        console.error("Get food partner error:", err);
+        res.status(500).json({ message: "Server error while fetching food partner profile" });
     }
 }
 
@@ -42,7 +47,9 @@ async function updateFoodPartner(req, res) {
             if (!currentPassword) {
                 return res.status(400).json({ message: "Current password is required to set a new password" });
             }
-            const isValid = await bcrypt.compare(currentPassword, foodPartner.password);
+            // Need password field from DB
+            const partnerWithPass = await foodPartnerModel.findById(foodPartner._id);
+            const isValid = await bcrypt.compare(currentPassword, partnerWithPass.password);
             if (!isValid) {
                 return res.status(400).json({ message: "Current password is incorrect" });
             }
@@ -56,22 +63,15 @@ async function updateFoodPartner(req, res) {
             foodPartner._id,
             { $set: updates },
             { new: true, runValidators: true }
-        );
+        ).select('-password');
 
         res.status(200).json({
             message: "Profile updated successfully",
-            foodPartner: {
-                _id: updated._id,
-                name: updated.name,
-                contactName: updated.contactName,
-                email: updated.email,
-                phone: updated.phone,
-                address: updated.address,
-            }
+            foodPartner: updated
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
+        console.error("Update food partner error:", err);
+        res.status(500).json({ message: "Server error while updating profile" });
     }
 }
 

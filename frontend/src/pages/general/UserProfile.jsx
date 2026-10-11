@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { foodApi } from '../../services/api';
 import '../../styles/user-profile.css';
-
-const api = axios.create({ baseURL: 'http://localhost:3001', withCredentials: true });
 
 function getInitials(name = '') {
     return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
 }
+
 const GRAD = [
-    'linear-gradient(135deg,#4776e6,#8e54e9)',
-    'linear-gradient(135deg,#11998e,#38ef7d)',
-    'linear-gradient(135deg,#f953c6,#b91d73)',
-    'linear-gradient(135deg,#fc4a1a,#f7b733)',
-    'linear-gradient(135deg,#43cea2,#185a9d)',
+    'linear-gradient(135deg, #ff416c, #ff4b2b)',
+    'linear-gradient(135deg, #f59e0b, #ea580c)',
+    'linear-gradient(135deg, #10b981, #059669)',
+    'linear-gradient(135deg, #8b5cf6, #6d28d9)',
 ];
+
 function getGrad(name = '') {
     let h = 0;
     for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
@@ -23,44 +23,88 @@ function getGrad(name = '') {
 
 const UserProfile = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const { user, foodPartner, isPartner, isLoggedIn, logout } = useAuth();
     const [savedVideos, setSavedVideos] = useState([]);
+    const [partnerVideos, setPartnerVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeVideo, setActiveVideo] = useState(null);
 
     useEffect(() => {
-        Promise.all([
-            api.get('/api/auth/user/me'),
-            api.get('/api/food/save'),
-        ])
-            .then(([userRes, savedRes]) => {
-                setUser(userRes.data.user);
-                const foods = (savedRes.data.savedFoods || []).map(s => s.food).filter(Boolean);
-                setSavedVideos(foods);
-            })
-            .catch(() => {
-                // not logged in
-                navigate('/user/login');
-            })
-            .finally(() => setLoading(false));
-    }, [navigate]);
+        if (!isLoggedIn) {
+            setLoading(false);
+            return;
+        }
+
+        if (isPartner && foodPartner) {
+            // Load partner's uploaded videos
+            foodApi.getAll()
+                .then(res => {
+                    const myVideos = (res.data.foodItems || []).filter(
+                        v => v.foodPartner?._id === foodPartner._id || v.foodPartner === foodPartner._id
+                    );
+                    setPartnerVideos(myVideos);
+                })
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        } else {
+            // Load user's saved reels
+            foodApi.getSaved()
+                .then(savedRes => {
+                    setSavedVideos(savedRes.data.savedFoods || []);
+                })
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        }
+    }, [isLoggedIn, isPartner, foodPartner]);
 
     const handleLogout = async () => {
-        await api.get('/api/auth/user/logout').catch(() => {});
-        navigate('/user/login');
+        await logout();
+        navigate('/');
     };
 
-    if (loading) return (
-        <div className="up-loading"><div className="up-spinner" /></div>
-    );
+    if (loading) {
+        return (
+            <div className="up-loading"><div className="up-spinner" /></div>
+        );
+    }
 
-    if (!user) return null;
+    // Guest prompt if not logged in
+    if (!isLoggedIn) {
+        return (
+            <div className="up-page" style={{ paddingTop: '80px', textAlign: 'center' }}>
+                <div style={{
+                    maxWidth: '480px',
+                    margin: '40px auto',
+                    padding: '32px 24px',
+                    background: 'var(--color-surface)',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid var(--color-border)'
+                }}>
+                    <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>👋</span>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome to FoodReels</h1>
+                    <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 24px', fontSize: '0.92rem' }}>
+                        Sign in to like, save your favorite food reels, and get personalized AI recommendations.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <Link to="/user/login" className="up-empty-cta" style={{ display: 'block', textAlign: 'center' }}>
+                            Sign In as Foodie
+                        </Link>
+                        <Link to="/food-partner/login" className="up-link-card" style={{ justifyContent: 'center' }}>
+                            <span>🍴 Food Partner Login</span>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-    const grad     = getGrad(user.fullName);
-    const initials = getInitials(user.fullName);
+    const accountName = isPartner ? foodPartner.name : user.fullName;
+    const accountEmail = isPartner ? foodPartner.email : user.email;
+    const grad = getGrad(accountName);
+    const initials = getInitials(accountName);
 
     return (
-        <div className="up-page">
+        <div className="up-page" style={{ paddingTop: '76px' }}>
 
             {/* ── Header ── */}
             <div className="up-header">
@@ -68,8 +112,18 @@ const UserProfile = () => {
                     {initials}
                 </div>
                 <div className="up-info">
-                    <h1 className="up-name">{user.fullName}</h1>
-                    <p className="up-email">{user.email}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h1 className="up-name">{accountName}</h1>
+                        {isPartner && (
+                            <span className="badge-tag tag-cuisine">🍴 Restaurant Partner</span>
+                        )}
+                    </div>
+                    <p className="up-email">{accountEmail}</p>
+                    {isPartner && foodPartner.address && (
+                        <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                            📍 {foodPartner.address}
+                        </p>
+                    )}
                 </div>
                 <button className="up-logout-btn" onClick={handleLogout} aria-label="Log out">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,43 +137,65 @@ const UserProfile = () => {
 
             {/* ── Stats ── */}
             <div className="up-stats">
-                <div className="up-stat">
-                    <span className="up-stat-value">{savedVideos.length}</span>
-                    <span className="up-stat-label">Saved</span>
-                </div>
+                {isPartner ? (
+                    <>
+                        <div className="up-stat">
+                            <span className="up-stat-value">{partnerVideos.length}</span>
+                            <span className="up-stat-label">Uploaded Reels</span>
+                        </div>
+                        <div className="up-stat">
+                            <span className="up-stat-value">
+                                {partnerVideos.reduce((acc, v) => acc + (v.likeCount || 0), 0)}
+                            </span>
+                            <span className="up-stat-label">Total Likes</span>
+                        </div>
+                    </>
+                ) : (
+                    <div className="up-stat">
+                        <span className="up-stat-value">{savedVideos.length}</span>
+                        <span className="up-stat-label">Saved Reels</span>
+                    </div>
+                )}
             </div>
 
             {/* ── Quick links ── */}
             <div className="up-links">
+                {isPartner && (
+                    <Link to="/create-food" className="up-link-card" style={{ border: '1px solid #ff4757' }}>
+                        <span className="up-link-icon">➕</span>
+                        <span style={{ fontWeight: 700, color: '#ff4757' }}>Upload New Food Reel</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
+                    </Link>
+                )}
                 <Link to="/" className="up-link-card">
-                    <span className="up-link-icon">🏠</span>
-                    <span>Home Feed</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
-                </Link>
-                <Link to="/saved" className="up-link-card">
-                    <span className="up-link-icon">🔖</span>
-                    <span>Saved Reels</span>
+                    <span className="up-link-icon">🔥</span>
+                    <span>Home Reels Feed</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
                 </Link>
                 <Link to="/search" className="up-link-card">
-                    <span className="up-link-icon">🔍</span>
-                    <span>Discover Food</span>
+                    <span className="up-link-icon">✨</span>
+                    <span>AI Craving Sommelier</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="up-link-arrow"><polyline points="9 18 15 12 9 6" /></svg>
                 </Link>
             </div>
 
-            {/* ── Saved videos grid ── */}
+            {/* ── Content Grid (Partner Uploads or User Saves) ── */}
             <section className="up-saved-section">
-                <h2 className="up-section-title">Saved Reels</h2>
-                {savedVideos.length === 0 ? (
+                <h2 className="up-section-title">
+                    {isPartner ? "Your Uploaded Reels" : "Saved Reels"}
+                </h2>
+
+                {(isPartner ? partnerVideos : savedVideos).length === 0 ? (
                     <div className="up-empty">
-                        <span>🔖</span>
-                        <p>Nothing saved yet.</p>
-                        <Link to="/" className="up-empty-cta">Browse reels</Link>
+                        <span>{isPartner ? "📹" : "🔖"}</span>
+                        <p>{isPartner ? "You haven't uploaded any reels yet." : "Nothing saved yet."}</p>
+                        <Link to={isPartner ? "/create-food" : "/"} className="up-empty-cta">
+                            {isPartner ? "Create your first reel" : "Browse reels"}
+                        </Link>
                     </div>
                 ) : (
                     <div className="up-grid">
-                        {savedVideos.map(v => (
+                        {(isPartner ? partnerVideos : savedVideos).map(v => (
                             <button
                                 key={v._id}
                                 className="up-grid-item"
@@ -132,6 +208,7 @@ const UserProfile = () => {
                                 </div>
                                 <div className="up-grid-meta">
                                     <span className="up-grid-name">{v.name}</span>
+                                    <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>❤️ {v.likeCount || 0}</span>
                                 </div>
                             </button>
                         ))}
@@ -148,6 +225,14 @@ const UserProfile = () => {
                         <div className="up-lightbox-info">
                             <h3>{activeVideo.name}</h3>
                             {activeVideo.description && <p>{activeVideo.description}</p>}
+                            <div style={{ marginTop: '10px' }}>
+                                <button
+                                    className="up-empty-cta"
+                                    onClick={() => navigate(`/?highlight=${activeVideo._id}`)}
+                                >
+                                    Open in Feed →
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

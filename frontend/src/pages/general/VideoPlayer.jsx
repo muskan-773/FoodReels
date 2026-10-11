@@ -1,13 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import '../../styles/video-player.css';
 import Toast from '../../components/Toast';
-
-const api = axios.create({
-    baseURL: "http://localhost:3001",
-    withCredentials: true,
-});
+import { foodApi } from '../../services/api';
 
 const VideoPlayer = () => {
     const { id } = useParams();
@@ -23,15 +18,20 @@ const VideoPlayer = () => {
     const showToast = (message, type = 'info') => setToast({ message, type });
 
     useEffect(() => {
-        api.get(`/api/food/${id}`)
-            .then(res => setFood(res.data.food))
-            .catch(err => setError(err.response?.data?.message || "Video not found."))
+        foodApi.getById(id)
+            .then(res => {
+                const item = res.data.food;
+                setFood(item);
+                setLiked(Boolean(item.isLiked));
+                setSaved(Boolean(item.isSaved));
+            })
+            .catch(err => setError(err.response?.data?.message || "Reel not found."))
             .finally(() => setLoading(false));
     }, [id]);
 
     const handleLike = async () => {
         try {
-            const res = await api.post('/api/food/like', { foodId: id });
+            const res = await foodApi.like(id);
             const isLiked = res.data.like;
             setLiked(isLiked);
             setFood(prev => ({
@@ -45,14 +45,14 @@ const VideoPlayer = () => {
 
     const handleSave = async () => {
         try {
-            const res = await api.post('/api/food/save', { foodId: id });
+            const res = await foodApi.save(id);
             const isSaved = res.data.save;
             setSaved(isSaved);
             setFood(prev => ({
                 ...prev,
                 savesCount: Math.max(0, (prev.savesCount ?? 0) + (isSaved ? 1 : -1))
             }));
-            showToast(isSaved ? "Saved!" : "Removed from saved.", "success");
+            showToast(isSaved ? "Saved to collection!" : "Removed from saved.", "success");
         } catch (err) {
             showToast(err.response?.data?.message || "Please log in to save.", "error");
         }
@@ -60,15 +60,15 @@ const VideoPlayer = () => {
 
     if (loading) {
         return (
-            <div className="vp-page">
-                <div className="vp-loading" aria-busy="true">Loading…</div>
+            <div className="vp-page" style={{ paddingTop: '80px' }}>
+                <div className="vp-loading" aria-busy="true">Loading reel…</div>
             </div>
         );
     }
 
     if (error || !food) {
         return (
-            <div className="vp-page">
+            <div className="vp-page" style={{ paddingTop: '80px' }}>
                 <div className="vp-error">
                     <p>{error || "Video not found."}</p>
                     <button onClick={() => navigate(-1)} className="vp-back-btn">← Go back</button>
@@ -78,7 +78,7 @@ const VideoPlayer = () => {
     }
 
     return (
-        <div className="vp-page">
+        <div className="vp-page" style={{ paddingTop: '80px' }}>
             <button className="vp-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
                 ← Back
             </button>
@@ -98,6 +98,14 @@ const VideoPlayer = () => {
 
                 <aside className="vp-info">
                     <h1 className="vp-title">{food.name}</h1>
+
+                    {/* Dietary / Cuisine Badges */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '4px 0 10px' }}>
+                        {food.cuisine && <span className="badge-tag tag-cuisine">🍴 {food.cuisine}</span>}
+                        {food.dietaryTags?.map(tag => (
+                            <span key={tag} className="badge-tag">{tag}</span>
+                        ))}
+                    </div>
 
                     {food.description && (
                         <p className="vp-description">{food.description}</p>

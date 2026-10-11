@@ -1,22 +1,36 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import axios from 'axios';
 import '../../styles/create-food.css';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../components/Toast';
+import { foodApi } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+
+const CUISINES = ['Italian', 'Indian', 'Japanese', 'Mexican', 'Asian', 'American', 'Bakery & Desserts', 'Healthy & Clean', 'Street Food'];
+const DIETARY_TAG_OPTIONS = ['Vegetarian', 'Vegan', 'Spicy', 'Gluten-Free', 'High-Protein', 'Dessert', 'Cheesy'];
 
 const CreateFood = () => {
+    const { isPartner } = useAuth();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [cuisine, setCuisine] = useState('Italian');
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [price, setPrice] = useState('');
     const [videoFile, setVideoFile] = useState(null);
     const [videoURL, setVideoURL] = useState('');
     const [fileError, setFileError] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [aiLoading, setAiLoading] = useState(false); // ← AI state
+    const [aiLoading, setAiLoading] = useState(false);
     const [toast, setToast] = useState(null);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
     const showToast = (message, type = 'info') => setToast({ message, type });
+
+    const toggleTag = (tag) => {
+        setSelectedTags(prev =>
+            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        );
+    };
 
     // ── AI description generator ──────────────────────────────
     const generateDescription = async () => {
@@ -26,13 +40,9 @@ const CreateFood = () => {
         }
         setAiLoading(true);
         try {
-            const response = await axios.post(
-                "http://localhost:3001/api/food/generate-description",
-                { foodName: name.trim() },
-                { withCredentials: true }
-            );
+            const response = await foodApi.generateDescription(name.trim(), cuisine);
             setDescription(response.data.description);
-            showToast("Description generated! Feel free to edit it.", "success");
+            showToast("Description generated with AI! Feel free to edit.", "success");
         } catch (err) {
             const msg = err.response?.data?.message || "AI generation failed. Please try again.";
             showToast(msg, "error");
@@ -67,7 +77,6 @@ const CreateFood = () => {
     };
 
     const onDragOver = (e) => e.preventDefault();
-
     const openFileDialog = () => fileInputRef.current?.click();
 
     const onSubmit = async (e) => {
@@ -79,13 +88,14 @@ const CreateFood = () => {
             const formData = new FormData();
             formData.append('name', name.trim());
             formData.append('description', description.trim());
-            formData.append('video', videoFile); // field name must match multer's upload.single("video")
+            formData.append('cuisine', cuisine);
+            formData.append('dietaryTags', JSON.stringify(selectedTags));
+            formData.append('price', price || 0);
+            formData.append('video', videoFile);
 
-            await axios.post("http://localhost:3001/api/food", formData, {
-                withCredentials: true,
-            });
+            await foodApi.create(formData);
 
-            showToast("Food created successfully!", "success");
+            showToast("Food reel created successfully!", "success");
             setTimeout(() => navigate("/"), 1200);
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to create food. Please try again.";
@@ -98,16 +108,17 @@ const CreateFood = () => {
     const isDisabled = useMemo(() => !name.trim() || !videoFile || submitting, [name, videoFile, submitting]);
 
     return (
-        <div className="create-food-page">
+        <div className="create-food-page" style={{ paddingTop: '80px' }}>
             <div className="create-food-card">
                 <header className="create-food-header">
-                    <h1 className="create-food-title">Create Food</h1>
-                    <p className="create-food-subtitle">Upload a short video, give it a name, and add a description.</p>
+                    <h1 className="create-food-title">Create Food Reel</h1>
+                    <p className="create-food-subtitle">Upload a short video, give it a name, select tags, and generate an AI caption.</p>
                 </header>
 
                 <form className="create-food-form" onSubmit={onSubmit}>
+                    {/* Video Upload Field */}
                     <div className="field-group">
-                        <label htmlFor="foodVideo">Food Video</label>
+                        <label htmlFor="foodVideo">Food Video <span aria-hidden="true">*</span></label>
                         <input
                             id="foodVideo"
                             ref={fileInputRef}
@@ -133,9 +144,9 @@ const CreateFood = () => {
                                     <path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="currentColor" />
                                 </svg>
                                 <div className="file-dropzone-text">
-                                    <strong>Tap to upload</strong> or drag and drop
+                                    <strong>Tap to upload video</strong> or drag and drop
                                 </div>
-                                <div className="file-hint">MP4, WebM, MOV • Up to ~100MB</div>
+                                <div className="file-hint">MP4, WebM, MOV • Up to 100MB</div>
                             </div>
                         </div>
 
@@ -143,9 +154,6 @@ const CreateFood = () => {
 
                         {videoFile && (
                             <div className="file-chip" aria-live="polite">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                    <path d="M10 8.5l5 3.5-5 3.5V8.5z" />
-                                </svg>
                                 <span className="file-chip-name">{videoFile.name}</span>
                                 <span className="file-chip-size">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>
                                 <div className="file-chip-actions">
@@ -162,12 +170,13 @@ const CreateFood = () => {
                         </div>
                     )}
 
+                    {/* Dish Name */}
                     <div className="field-group">
-                        <label htmlFor="foodName">Name <span aria-hidden="true">*</span></label>
+                        <label htmlFor="foodName">Dish Name <span aria-hidden="true">*</span></label>
                         <input
                             id="foodName"
                             type="text"
-                            placeholder="e.g., Spicy Paneer Wrap"
+                            placeholder="e.g., Artisanal Truffle Mushroom Pizza"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
@@ -175,15 +184,74 @@ const CreateFood = () => {
                         />
                     </div>
 
+                    {/* Cuisine & Price Row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        <div className="field-group">
+                            <label htmlFor="foodCuisine">Cuisine</label>
+                            <select
+                                id="foodCuisine"
+                                value={cuisine}
+                                onChange={(e) => setCuisine(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: 'var(--radius-md)',
+                                    background: 'var(--color-surface-alt)',
+                                    color: '#fff',
+                                    border: '1px solid var(--color-border)',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+                        <div className="field-group">
+                            <label htmlFor="foodPrice">Price ($)</label>
+                            <input
+                                id="foodPrice"
+                                type="number"
+                                placeholder="e.g., 16"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                min={0}
+                                step={0.5}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Dietary Tags */}
+                    <div className="field-group">
+                        <label>Dietary Tags</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                            {DIETARY_TAG_OPTIONS.map(tag => (
+                                <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => toggleTag(tag)}
+                                    className={`badge-tag ${selectedTags.includes(tag) ? 'tag-spicy' : ''}`}
+                                    style={{
+                                        cursor: 'pointer',
+                                        padding: '6px 12px',
+                                        fontSize: '0.8rem',
+                                        background: selectedTags.includes(tag) ? 'rgba(255, 71, 87, 0.3)' : 'rgba(255, 255, 255, 0.08)'
+                                    }}
+                                >
+                                    {selectedTags.includes(tag) ? `✓ ${tag}` : `+ ${tag}`}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Description with AI Assistant */}
                     <div className="field-group">
                         <div className="desc-label-row">
-                            <label htmlFor="foodDesc">Description</label>
+                            <label htmlFor="foodDesc">Description / Caption</label>
                             <button
                                 type="button"
                                 className="btn-ai"
                                 onClick={generateDescription}
                                 disabled={aiLoading || !name.trim()}
-                                aria-label="Generate description with AI"
+                                aria-label="Generate description with Gemini AI"
                             >
                                 {aiLoading ? (
                                     <>
@@ -191,14 +259,14 @@ const CreateFood = () => {
                                         Generating…
                                     </>
                                 ) : (
-                                    <>✨ Generate with AI</>
+                                    <>✨ Generate with Gemini</>
                                 )}
                             </button>
                         </div>
                         <textarea
                             id="foodDesc"
-                            rows={4}
-                            placeholder="Write a short description or click ✨ Generate with AI"
+                            rows={3}
+                            placeholder="Write an appetizing description or click ✨ Generate with Gemini"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             maxLength={500}
@@ -207,7 +275,7 @@ const CreateFood = () => {
 
                     <div className="form-actions">
                         <button className="btn-primary" type="submit" disabled={isDisabled}>
-                            {submitting ? "Uploading…" : "Save Food"}
+                            {submitting ? "Uploading Video Reel…" : "Publish Food Reel"}
                         </button>
                     </div>
                 </form>

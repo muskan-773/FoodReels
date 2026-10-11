@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { partnerApi } from '../../services/api';
 import '../../styles/partner-profile.css';
 
 function getInitials(name = '') {
@@ -30,7 +30,7 @@ const PartnerProfile = () => {
     const [activeVideo, setActiveVideo] = useState(null); // lightbox
 
     useEffect(() => {
-        axios.get(`http://localhost:3001/api/food-partner/${id}`, { withCredentials: true })
+        partnerApi.getById(id)
             .then(res => {
                 setProfile(res.data.foodPartner);
                 setVideos(res.data.foodPartner.foodItems || []);

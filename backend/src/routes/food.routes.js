@@ -7,15 +7,18 @@ const router = express.Router();
 
 const upload = multer({
     storage: multer.memoryStorage(),
+    limits: { fileSize: 100 * 1024 * 1024 } // 100MB video limit
 });
 
 /* ============================= */
 /*          PUBLIC ROUTES        */
 /* ============================= */
 
-// GET /api/food  → Public (home page food list)
-router.get("/", foodController.getFoodItems);
+// GET /api/food  → Public (home page food list with optional user like/save enrichment)
+router.get("/", authMiddleware.optionalAuthUserMiddleware, foodController.getFoodItems);
 
+// POST /api/food/recommend → AI-Powered Recommendation Engine
+router.post("/recommend", authMiddleware.optionalAuthUserMiddleware, foodController.getRecommendations);
 
 /* ============================= */
 /*         USER ROUTES           */
@@ -39,7 +42,6 @@ router.get("/save",
     foodController.getSaveFood
 );
 
-
 /* ============================= */
 /*      FOOD PARTNER ROUTES     */
 /* ============================= */
@@ -57,13 +59,11 @@ router.post("/",
     foodController.createFood
 );
 
-
 /* ============================= */
 /*   PARAMETERISED PUBLIC ROUTE  */
 /* ============================= */
 
 // GET /api/food/:id  → Public (single food item) — must be LAST
-router.get("/:id", foodController.getFoodItemById);
-
+router.get("/:id", authMiddleware.optionalAuthUserMiddleware, foodController.getFoodItemById);
 
 module.exports = router;
