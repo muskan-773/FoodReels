@@ -1,10 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../../styles/create-food.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Toast from '../../components/Toast';
-import { foodApi } from '../../services/api';
+import { foodApi, authApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { Sparkles, UploadCloud, Film, Check, Plus, Trash2, RefreshCw, ChefHat, DollarSign } from 'lucide-react';
+import {
+    Sparkles,
+    UploadCloud,
+    Film,
+    Check,
+    Plus,
+    Trash2,
+    RefreshCw,
+    ChefHat,
+    DollarSign,
+    AlertCircle,
+    ArrowRight
+} from 'lucide-react';
 
 const CUISINES = [
     'Italian',
@@ -31,7 +43,7 @@ const DIETARY_TAG_OPTIONS = [
 ];
 
 const CreateFood = () => {
-    const { isPartner } = useAuth();
+    const { isPartner, login, user } = useAuth();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [cuisine, setCuisine] = useState('Italian');
@@ -42,6 +54,7 @@ const CreateFood = () => {
     const [fileError, setFileError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
+    const [partnerSwitching, setPartnerSwitching] = useState(false);
     const [toast, setToast] = useState(null);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
@@ -54,17 +67,34 @@ const CreateFood = () => {
         );
     };
 
+    // 1-Click login as demo chef if currently not logged in as a partner
+    const handleQuickPartnerLogin = async () => {
+        setPartnerSwitching(true);
+        try {
+            const res = await authApi.loginPartner({
+                email: 'marco@bellanapoli.com',
+                password: 'password123'
+            });
+            login(res.data.token, res.data.foodPartner, 'foodPartner');
+            showToast("Switched to Verified Partner Account (Bella Napoli Pizzeria)!", "success");
+        } catch (err) {
+            showToast("Failed to auto-sign in demo partner. Please use the Partner Login page.", "error");
+        } finally {
+            setPartnerSwitching(false);
+        }
+    };
+
     // ── AI description generator ──────────────────────────────
     const generateDescription = async () => {
         if (!name.trim()) {
-            showToast("Enter a dish name first so the culinary AI knows what to craft.", "error");
+            showToast("Enter a dish title first so the culinary AI knows what to craft.", "error");
             return;
         }
         setAiLoading(true);
         try {
             const response = await foodApi.generateDescription(name.trim(), cuisine);
             setDescription(response.data.description);
-            showToast("Editorial description crafted with Gemini AI.", "success");
+            showToast("Editorial tasting notes crafted with Gemini AI.", "success");
         } catch (err) {
             const msg = err.response?.data?.message || "AI generation failed. Please compose manually.";
             showToast(msg, "error");
@@ -105,6 +135,11 @@ const CreateFood = () => {
         e.preventDefault();
         if (!name.trim() || !videoFile) return;
 
+        if (!isPartner) {
+            showToast("You must be logged in as a Restaurant Partner to upload reels.", "error");
+            return;
+        }
+
         setSubmitting(true);
         try {
             const formData = new FormData();
@@ -117,10 +152,11 @@ const CreateFood = () => {
 
             await foodApi.create(formData);
 
-            showToast("Culinary reel published to FoodReels feed!", "success");
+            showToast("Culinary reel published successfully to FoodReels!", "success");
             setTimeout(() => navigate("/"), 1200);
         } catch (err) {
-            const msg = err.response?.data?.message || "Failed to publish reel. Please verify your upload.";
+            console.error("Upload error:", err);
+            const msg = err.response?.data?.message || err.message || "Failed to publish reel. Please verify your upload.";
             showToast(msg, "error");
         } finally {
             setSubmitting(false);
@@ -139,6 +175,67 @@ const CreateFood = () => {
                     <h1 className="create-food-title">Publish a Culinary Reel</h1>
                     <p className="create-food-subtitle">Upload high-resolution video footage of your dish. Showcase the artistry, texture, and aroma to food lovers across the city.</p>
                 </header>
+
+                {/* ── Partner Authentication Notice ── */}
+                {!isPartner && (
+                    <div style={{
+                        background: 'rgba(223, 158, 56, 0.1)',
+                        border: '1px solid rgba(223, 158, 56, 0.3)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '14px 16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-accent-gold)', fontSize: '0.88rem', fontWeight: 600 }}>
+                            <AlertCircle size={18} />
+                            <span>Restaurant Partner Account Required</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                            You are currently viewing as a guest or foodie member. Video reel uploading requires signing in to a restaurant partner account.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '2px' }}>
+                            <button
+                                type="button"
+                                onClick={handleQuickPartnerLogin}
+                                disabled={partnerSwitching}
+                                style={{
+                                    background: 'var(--color-accent-gold)',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '7px 14px',
+                                    borderRadius: 'var(--radius-full)',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <Sparkles size={13} />
+                                {partnerSwitching ? "Switching…" : "1-Click Switch: Marco Rossi Demo Kitchen"}
+                            </button>
+                            <Link
+                                to="/food-partner/login"
+                                style={{
+                                    color: '#fff',
+                                    padding: '7px 14px',
+                                    borderRadius: 'var(--radius-full)',
+                                    border: '1px solid var(--color-border)',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}
+                            >
+                                Partner Login <ArrowRight size={13} />
+                            </Link>
+                        </div>
+                    </div>
+                )}
 
                 <form className="create-food-form" onSubmit={onSubmit}>
                     {/* Video Upload Field */}
@@ -314,7 +411,7 @@ const CreateFood = () => {
                             disabled={isDisabled}
                             style={{ width: '100%', padding: '14px', fontSize: '0.96rem' }}
                         >
-                            {submitting ? "Uploading Video Reel…" : "Publish Reel to FoodReels"}
+                            {submitting ? "Uploading Video Reel to Kitchen Catalog…" : "Publish Reel to FoodReels"}
                         </button>
                     </div>
                 </form>

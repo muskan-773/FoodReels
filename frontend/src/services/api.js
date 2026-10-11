@@ -37,9 +37,7 @@ export const foodApi = {
     like: (foodId) => api.post('/api/food/like', { foodId }),
     save: (foodId) => api.post('/api/food/save', { foodId }),
     getSaved: () => api.get('/api/food/save'),
-    create: (formData) => api.post('/api/food', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+    create: (formData) => api.post('/api/food', formData),
     generateDescription: (foodName, category) => api.post('/api/food/generate-description', { foodName, category }),
     getRecommendations: (payload) => api.post('/api/food/recommend', payload),
 };

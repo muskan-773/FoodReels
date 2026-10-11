@@ -21,6 +21,10 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Uploaded video files (media assets)
+backend/uploads/videos/*
+!backend/uploads/videos/.gitkeep
+
 # OS & Editor files
 .DS_Store
 .idea/

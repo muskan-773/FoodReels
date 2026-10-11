@@ -52,10 +52,24 @@ router.post("/generate-description",
     foodController.generateDescription
 );
 
+const handleUpload = (req, res, next) => {
+    upload.single("video")(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({ message: "Video file exceeds 100MB limit. Please choose a smaller video." });
+            }
+            return res.status(400).json({ message: `Upload error: ${err.message}` });
+        } else if (err) {
+            return res.status(400).json({ message: err.message || "File upload failed" });
+        }
+        next();
+    });
+};
+
 // POST /api/food  → Only Food Partner can create food
 router.post("/",
     authMiddleware.authFoodPartnerMiddleware,
-    upload.single("video"),
+    handleUpload,
     foodController.createFood
 );
 

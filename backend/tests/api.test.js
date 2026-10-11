@@ -142,6 +142,16 @@ async function runTests() {
             assert.ok(result.recommendations[0].recommendationReason, 'Expected recommendation reason');
         });
 
+        // Test 8: Storage Service Video Upload & Fallback
+        await test('Storage Service saves video buffer locally when ImageKit is unconfigured', async () => {
+            const storageService = require('../src/services/storage.service');
+            const sampleBuffer = Buffer.from('mock-mp4-video-stream-content-bytes');
+            const result = await storageService.uploadFile(sampleBuffer, 'chef-special.mp4');
+            assert.ok(result.url, 'Expected valid video URL');
+            assert.ok(result.url.includes('/uploads/videos/'), 'Expected /uploads/videos/ path in URL');
+            assert.ok(result.fileId.endsWith('.mp4'), 'Expected .mp4 extension on fileId');
+        });
+
     } finally {
         server.close();
     }

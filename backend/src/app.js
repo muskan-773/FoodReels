@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const authRoutes = require('./routes/auth.routes');
 const foodRoutes = require('./routes/food.routes');
@@ -57,6 +58,9 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve uploaded video reels and assets statically
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Root welcome route
 app.get('/', (req, res) => {

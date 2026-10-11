@@ -21,7 +21,8 @@ async function createFood(req, res) {
         if (req.file) {
             const fileUploadResult = await storageService.uploadFile(
                 req.file.buffer,
-                req.file.originalname
+                req.file.originalname,
+                req
             );
             uploadedVideoUrl = fileUploadResult.url;
         }
